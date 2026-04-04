@@ -1,52 +1,15 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const roomSchema = new mongoose.Schema({
-  roomNumber: String,
-  name: String,
-  location: String,
-  type: String,
-  status: {
-    type: String,
-    default: "Available",
-  },
-  price: Number,
-  bedsAvailable: {
-    type: Number,
-    default: 0,
-  },
-  hostelType: {
-    type: String,
-    default: "Mixed Hostel",
-  },
-  nearUniversity: {
-    type: Boolean,
-    default: false,
-  },
-  mealPlanIncluded: {
-    type: Boolean,
-    default: false,
-  },
-  maxResidentsPerRoom: {
-    type: Number,
-    default: 1,
-  },
-  stayPeriodLabel: {
-    type: String,
-    default: "Any",
-  },
-  features: {
-    type: [String],
-    default: [],
-  },
-  image: String,
-  rating: {
-    type: Number,
-    default: 8.0,
-  },
-  reviews: {
-    type: Number,
-    default: 0,
-  },
-});
+const RoomSchema = new mongoose.Schema({
+    roomNumber: { type: String, required: true, unique: true },
+    block: { type: String },
+    floor: { type: Number },
+    type: { type: String, enum: ['Single', 'Double', 'Triple', 'Dormitory'] },
+    capacity: { type: Number, required: true },
+    currentOccupancy: { type: Number, default: 0 },
+    status: { type: String, enum: ['Available', 'Full', 'Maintenance'], default: 'Available' },
+    amenities: [{ type: String }],
+    pricePerMonth: { type: Number }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Room", roomSchema);
+module.exports = mongoose.model('Room', RoomSchema);
