@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-  transactionId: {
+  receiptNumber: {
     type: String,
-    required: true,
     unique: true
   },
-  invoice: {
+  transactionId: {
+    type: String,
+    unique: true
+  },
+  invoiceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Invoice',
     required: true
@@ -15,75 +18,79 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student',
-    required: true
-  },
   studentName: {
     type: String,
     required: true
   },
-  
-  // Payment Details
   amount: {
     type: Number,
-    required: true
+    required: true,
+    min: 0
   },
   paymentMethod: {
     type: String,
-    enum: ['Credit Card', 'Debit Card', 'Bank Transfer', 'Online Wallet'],
+    enum: ['Credit Card', 'Debit Card', 'Bank Transfer', 'Cash', 'Online Wallet'],
     required: true
   },
-  
-  // Card Details (last 4 digits only - for display)
   cardLastFour: {
-    type: String
+    type: String,
+    default: null
   },
-  
-  // Status
+  paymentDate: {
+    type: Date,
+    default: Date.now
+  },
   status: {
     type: String,
     enum: ['Pending', 'Completed', 'Failed', 'Refunded'],
     default: 'Completed'
   },
-  
-  // Receipt
-  receiptNumber: {
+  // NEW FIELDS (from 100% version)
+  receiptPdf: {
     type: String,
-    required: true,
-    unique: true
+    default: null
   },
-  
-  // Dates
-  paymentDate: {
-    type: Date,
-    default: Date.now
+  refunded: {
+    type: Boolean,
+    default: false
   },
-  
-  // Additional Info
-  remarks: {
-    type: String
+  refundAmount: {
+    type: Number,
+    default: 0
   },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now
+  notificationSent: {
+    type: Boolean,
+    default: false
+  },
+  verificationRequired: {
+    type: Boolean,
+    default: false
+  },
+  verified: {
+    type: Boolean,
+    default: true
   }
+}, {
+  timestamps: true
 });
 
-// Generate transaction and receipt numbers
+// Pre-save middleware to generate receipt number and transaction ID
 paymentSchema.pre('save', async function(next) {
-  if (!this.transactionId) {
-    this.transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-  }
-  
+  // Generate receipt number
   if (!this.receiptNumber) {
     const year = new Date().getFullYear();
-    const count = await mongoose.model('Payment').countDocuments();
+    const Payment = mongoose.model('Payment');
+    const count = await Payment.countDocuments();
     this.receiptNumber = `REC-${year}-${String(count + 1).padStart(6, '0')}`;
   }
-  
+
+  // Generate transaction ID
+  if (!this.transactionId) {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.transactionId = `TXN-${timestamp}-${random}`;
+  }
+
   next();
 });
 

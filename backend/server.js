@@ -21,6 +21,10 @@ mongoose.connect(process.env.MONGO_URI)
 // Import routes
 const invoiceRoutes = require('./routes/invoice');
 const paymentRoutes = require('./routes/payments');
+const refundRoutes = require('./routes/refunds');
+const notificationRoutes = require('./routes/notifications');
+const reportRoutes = require('./routes/reports');
+const bankTransferRoutes = require('./routes/bankTransfer');
 
 // Test route
 app.get('/', (req, res) => {
@@ -40,6 +44,14 @@ app.get('/api/test', (req, res) => {
 
 // Port
 const PORT = process.env.PORT || 5000;
+
+// Routes setup
+app.use('/api/invoice', invoiceRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/refunds', refundRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/bank-transfer', bankTransferRoutes);
 
 // Start server
 app.listen(PORT, () => {

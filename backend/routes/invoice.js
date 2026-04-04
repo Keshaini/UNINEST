@@ -2,17 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Invoice = require('../models/Invoice');
 
-// @route   GET /api/invoices
-// @desc    Get all invoices for a student
-// @access  Public (should be protected in production)
+// Get all invoices
 router.get('/', async (req, res) => {
   try {
-    const { studentId } = req.query;
+    const invoices = await Invoice.find().sort({ createdAt: -1 });
     
-    const query = studentId ? { studentId } : {};
-    const invoices = await Invoice.find(query).sort({ invoiceDate: -1 });
-    
-    res.json({
+    res.status(200).json({
       success: true,
       count: invoices.length,
       data: invoices
@@ -27,9 +22,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// @route   GET /api/invoices/:id
-// @desc    Get single invoice by ID
-// @access  Public
+// Get single invoice by ID
 router.get('/:id', async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id);
@@ -41,7 +34,7 @@ router.get('/:id', async (req, res) => {
       });
     }
     
-    res.json({
+    res.status(200).json({
       success: true,
       data: invoice
     });
@@ -55,72 +48,46 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// @route   POST /api/invoices
-// @desc    Create new invoice (for testing/demo)
-// @access  Public
+// Create new invoice
 router.post('/', async (req, res) => {
   try {
-    const {
-      studentName,
-      studentId,
-      roomFee,
-      securityDeposit,
-      utilities,
-      otherFees,
-      discount,
-      discountPercentage,
-      semester,
-      academicYear,
-      dueDate
-    } = req.body;
-    
-    // Calculate amounts
-    const subtotal = (roomFee || 50000) + (securityDeposit || 25000) + 
-                     (utilities || 8000) + (otherFees || 0);
-    const discountAmount = discount || (subtotal * (discountPercentage || 0) / 100);
-    const totalAmount = subtotal - discountAmount;
-    
-    // Create items array
+    let { roomFee, securityDeposit, utilities, otherFees } = req.body;
+
+    // ✅ Convert to numbers safely
+    roomFee = Number(roomFee) || 0;
+    securityDeposit = Number(securityDeposit) || 0;
+    utilities = Number(utilities) || 0;
+    otherFees = Number(otherFees) || 0;
+
     const items = [
-      { description: 'Monthly Room Fee', amount: roomFee || 50000 },
-      { description: 'Security Deposit', amount: securityDeposit || 25000 },
-      { description: 'Utilities', amount: utilities || 8000 }
+      { description: 'Room Fee', amount: roomFee },
+      { description: 'Security Deposit', amount: securityDeposit },
+      { description: 'Utilities', amount: utilities },
+      { description: 'Other Fees', amount: otherFees }
     ];
-    
-    if (otherFees > 0) {
-      items.push({ description: 'Other Fees', amount: otherFees });
-    }
-    
-    const invoice = new Invoice({
-      studentName,
-      studentId,
+
+    const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+
+    const invoiceData = {
+      ...req.body,
       items,
-      roomFee: roomFee || 50000,
-      securityDeposit: securityDeposit || 25000,
-      utilities: utilities || 8000,
-      otherFees: otherFees || 0,
-      subtotal,
-      discount: discountAmount,
-      discountPercentage: discountPercentage || 0,
-      totalAmount,
-      outstandingBalance: totalAmount,
-      semester: semester || 'Semester 1',
-      academicYear: academicYear || '2026',
-      dueDate: dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-    });
-    
-    await invoice.save();
-    
+      subtotal
+    };
+
+    const invoice = await Invoice.create(invoiceData);
+
     res.status(201).json({
       success: true,
       message: 'Invoice created successfully',
       data: invoice
     });
+
   } catch (error) {
-    console.error('Error creating invoice:', error);
-    res.status(500).json({
+    console.error('❌ FULL ERROR:', error);
+
+    res.status(400).json({   // 👈 change to 400 for validation clarity
       success: false,
-      message: 'Failed to create invoice',
+      message: 'Validation failed',
       error: error.message
     });
   }

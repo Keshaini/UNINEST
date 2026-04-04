@@ -3,13 +3,7 @@ const mongoose = require('mongoose');
 const invoiceSchema = new mongoose.Schema({
   invoiceNumber: {
     type: String,
-    required: true,
     unique: true
-  },
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student',
-    required: true
   },
   studentName: {
     type: String,
@@ -19,38 +13,26 @@ const invoiceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  
-  // Invoice Items
+  invoiceDate: {
+    type: Date,
+    default: Date.now
+  },
+  dueDate: {
+    type: Date,
+    required: true
+  },
+  semester: {
+    type: String,
+    required: true
+  },
+  academicYear: {
+    type: String,
+    required: true
+  },
   items: [{
-    description: {
-      type: String,
-      required: true
-    },
-    amount: {
-      type: Number,
-      required: true
-    }
+    description: String,
+    amount: Number
   }],
-  
-  // Amounts
-  roomFee: {
-    type: Number,
-    required: true,
-    default: 50000
-  },
-  securityDeposit: {
-    type: Number,
-    required: true,
-    default: 25000
-  },
-  utilities: {
-    type: Number,
-    default: 8000
-  },
-  otherFees: {
-    type: Number,
-    default: 0
-  },
   subtotal: {
     type: Number,
     required: true
@@ -75,61 +57,41 @@ const invoiceSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  
-  // Status
   status: {
     type: String,
-    enum: ['Unpaid', 'Partially Paid', 'Paid', 'Overdue'],
+    enum: ['Paid', 'Unpaid', 'Partially Paid', 'Overdue'],
     default: 'Unpaid'
-  },
-  
-  // Dates
-  invoiceDate: {
-    type: Date,
-    default: Date.now
-  },
-  dueDate: {
-    type: Date,
-    required: true
-  },
-  
-  // Additional Info
-  semester: {
-    type: String,
-    required: true
-  },
-  academicYear: {
-    type: String,
-    required: true
-  },
-  
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true
 });
 
-// Generate invoice number
-invoiceSchema.pre('save', async function(next) {
+// Auto-generate invoice number before saving
+invoiceSchema.pre('save', async function () {
   if (!this.invoiceNumber) {
     const year = new Date().getFullYear();
     const count = await mongoose.model('Invoice').countDocuments();
     this.invoiceNumber = `INV-${year}-${String(count + 1).padStart(6, '0')}`;
   }
-  
-  // Calculate outstanding balance
-  this.outstandingBalance = this.totalAmount - this.amountPaid;
-  
-  // Update status based on payment
-  if (this.amountPaid === 0) {
-    this.status = new Date() > this.dueDate ? 'Overdue' : 'Unpaid';
-  } else if (this.amountPaid >= this.totalAmount) {
-    this.status = 'Paid';
-  } else {
-    this.status = 'Partially Paid';
+
+  if (!this.dueDate) {
+    this.dueDate = new Date(this.invoiceDate);
+    this.dueDate.setDate(this.dueDate.getDate() + 30);
   }
-  
-  next();
+
+  this.discount = (this.subtotal * this.discountPercentage) / 100;
+  this.totalAmount = this.subtotal - this.discount;
+  this.outstandingBalance = this.totalAmount - this.amountPaid;
+
+  if (this.amountPaid >= this.totalAmount) {
+    this.status = 'Paid';
+  } else if (this.amountPaid > 0) {
+    this.status = 'Partially Paid';
+  } else if (new Date() > this.dueDate) {
+    this.status = 'Overdue';
+  } else {
+    this.status = 'Unpaid';
+  }
 });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);
