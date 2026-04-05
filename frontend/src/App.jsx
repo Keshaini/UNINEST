@@ -1,26 +1,33 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import Navbar from './common/Navbar';  
 import Footer from './common/Footer';
 
+// Auth Components
+import ProtectedRoute from './components/auth/ProtectedRoute';
+
 // Student
-import InvoiceView from './components/payments/InvoiceView';
-import PaymentForm from './components/payments/PaymentForm';
-import PaymentSuccess from './components/payments/PaymentSuccess';
-import PaymentHistory from './components/payments/PaymentHistory';
-import InvoiceCreate from './pages/invoices/InvoiceCreate';
-import BankTransfer from './components/payments/BankTransfer';
-import RefundRequest from './components/payments/RefundRequest';
-import RefundHistory from './components/payments/RefundHistory';
+import StudentDashboard from './pages/student/StudentDashboard';
+import InvoiceView from './pages/student/InvoiceView';
+import PaymentForm from './pages/student/PaymentForm';
+import PaymentSuccess from './pages/student/PaymentSuccess';
+import PaymentHistory from './pages/student/PaymentHistory';
+import BankTransfer from './pages/student/BankTransfer';
+import RefundRequest from './pages/student/RefundRequest';
+import RefundHistory from './pages/student/RefundHistory';
+
 
 // Admin 
-import PaymentVerification from './components/admin/PaymentVerification';
-import DiscountManagement from './components/admin/DiscountManagement';
-import Reports from './components/admin/Reports';
+import AdminDashboard from './pages/admin/Dashboard';
+import InvoiceCreate from './pages/admin/InvoiceCreate';
+import PaymentVerification from './pages/admin/PaymentVerification';
+import DiscountManagement from './pages/admin/DiscountManagement';
+import Reports from './pages/admin/Reports';
 
-// Notifications
-import NotificationCenter from './components/notifications/NotificationCenter';
+// Shared Pages
+import NotificationCenter from './pages/shared/NotificationCenter';
 
 function App() {
   return (
@@ -35,21 +42,143 @@ function App() {
         {/* ✅ Page Content */}
         <div className="flex-grow">
           <Routes>
-            <Route path="/" element={<InvoiceCreate />} />
-            <Route path="/invoice" element={<InvoiceView />} />
-            <Route path="/payment-form/:invoiceId" element={<PaymentForm />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-history" element={<PaymentHistory />} />
-            <Route path="/invoice-create" element={<InvoiceCreate />} />
-            <Route path="/bank-transfer" element={<BankTransfer />} />
-            <Route path="/refund-request" element={<RefundRequest />} />
-            <Route path="/refund-history" element={<RefundHistory />} /> 
-            <Route path="/notifications" element={<NotificationCenter />} />
+            
+              {/* Student Routes (Protected) */}
+              <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin/verifications" element={<PaymentVerification />} />
-            <Route path="/admin/discounts" element={<DiscountManagement />} />
-            <Route path="/admin/reports" element={<Reports />} />
+              <Route 
+                path="/student/dashboard" 
+                element={
+                  <ProtectedRoute role="student">
+                    <StudentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/invoice" 
+                element={
+                  <ProtectedRoute>
+                    <InvoiceView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/invoice/:id" 
+                element={
+                  <ProtectedRoute>
+                    <InvoiceView />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment-form/:invoiceId" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment-success" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentSuccess />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/payment-history" 
+                element={
+                  <ProtectedRoute>
+                    <PaymentHistory />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/bank-transfer/:invoiceId" 
+                element={
+                  <ProtectedRoute>
+                    <BankTransfer />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/refund-request/:paymentId" 
+                element={
+                  <ProtectedRoute>
+                    <RefundRequest />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/refund-history" 
+                element={
+                  <ProtectedRoute>
+                    <RefundHistory />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Admin Routes (Protected + Admin Only) */}
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/admin/invoice/create" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <InvoiceCreate />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/verifications" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <PaymentVerification />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/discounts" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <DiscountManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/reports" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <Reports />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Shared Routes */}
+              <Route 
+                path="/notifications" 
+                element={
+                  <ProtectedRoute>
+                    <NotificationCenter />
+                  </ProtectedRoute>
+                } 
+              />
           </Routes>
         </div>
 

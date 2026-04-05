@@ -163,9 +163,6 @@ function Navbar() {
                 <Wrench size={18} />
                 <span>Complaints</span>
               </button>
-              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
-                Component 4 - Other Team Member
-              </div>
             </div>
           </div>
 

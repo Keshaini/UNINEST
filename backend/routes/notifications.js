@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
-const authMiddleware = require('../middleware/auth');
 
 // Get user notifications
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { unreadOnly, limit = 20 } = req.query;
     const userId = req.user.studentId;
@@ -41,7 +40,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // Mark notification as read
-router.put('/:id/read', authMiddleware, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -74,7 +73,7 @@ router.put('/:id/read', authMiddleware, async (req, res) => {
 });
 
 // Mark all as read
-router.put('/mark-all-read', authMiddleware, async (req, res) => {
+router.put('/mark-all-read', async (req, res) => {
   try {
     const userId = req.user.studentId;
 
@@ -99,7 +98,7 @@ router.put('/mark-all-read', authMiddleware, async (req, res) => {
 });
 
 // Delete notification
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
