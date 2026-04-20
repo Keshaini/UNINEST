@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Eye, AlertCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { getPendingVerifications, verifyBankTransfer } from '../../services/paymentService';
 
 function PaymentVerification() {
@@ -18,9 +18,7 @@ function PaymentVerification() {
     setLoading(true);
     try {
       const response = await getPendingVerifications();
-      if (response.success) {
-        setVerifications(response.data);
-      }
+      setVerifications(response.data || []);
     } catch (err) {
       setError('Failed to load pending verifications');
       console.error(err);
@@ -30,9 +28,7 @@ function PaymentVerification() {
   };
 
   const handleVerify = async (id, status) => {
-    if (!window.confirm(`Are you sure you want to ${status.toLowerCase()} this payment?`)) {
-      return;
-    }
+    if (!window.confirm(`Are you sure you want to ${status.toLowerCase()} this payment?`)) return;
 
     setProcessing(id);
     setError('');
@@ -44,7 +40,6 @@ function PaymentVerification() {
       });
 
       if (response.success) {
-        // Remove from list
         setVerifications(prev => prev.filter(v => v._id !== id));
         setSelectedPayment(null);
         setVerificationNotes('');
@@ -64,212 +59,122 @@ function PaymentVerification() {
     }).format(amount);
   };
 
-  const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center text-gray-300">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading verifications...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p>Loading verifications...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[#0a0c10] py-8 px-4 text-gray-300">
       <div className="max-w-7xl mx-auto">
+
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Payment Verification</h1>
-              <p className="text-gray-600 mt-2">Review and verify bank transfer payments</p>
-            </div>
-            <button
-              onClick={fetchPendingVerifications}
-              className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </button>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Payment Verification</h1>
+            <p className="text-gray-400 mt-2">Review and verify bank transfers</p>
           </div>
+          <button
+            onClick={fetchPendingVerifications}
+            className="flex items-center px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </button>
         </div>
 
-        {/* Error Alert */}
+        {/* Error */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
-            <div className="flex items-center">
-              <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
+          <div className="bg-red-900/40 border border-red-600 p-4 mb-6 rounded-lg flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-400 mr-2" />
+            <p className="text-red-300">{error}</p>
           </div>
         )}
 
         {/* Stats */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Pending Verifications</p>
-              <p className="text-3xl font-bold text-gray-900">{verifications.length}</p>
-            </div>
-            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-8 h-8 text-yellow-600" />
-            </div>
-          </div>
+        <div className="bg-gray-800 rounded-xl p-6 mb-6 border border-gray-700">
+          <p className="text-gray-400">Pending Verifications</p>
+          <p className="text-3xl font-bold text-white">{verifications.length}</p>
         </div>
 
-        {/* Verifications List */}
+        {/* Empty */}
         {verifications.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
+          <div className="bg-gray-800 rounded-xl p-12 text-center border border-gray-700">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              All Caught Up!
-            </h3>
-            <p className="text-gray-600">
-              There are no pending payment verifications at the moment.
-            </p>
+            <h3 className="text-xl text-white font-semibold">All Caught Up!</h3>
+            <p className="text-gray-400">No pending verifications</p>
           </div>
         ) : (
           <div className="space-y-6">
             {verifications.map((verification) => (
-              <div
-                key={verification._id}
-                className="bg-white rounded-xl shadow-md overflow-hidden"
-              >
-                <div className="p-6">
-                  {/* Payment Info */}
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    {/* Left Side - Details */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Payment ID: {verification.paymentId?._id}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            Invoice: {verification.invoiceId?.invoiceNumber}
-                          </p>
-                        </div>
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-full">
-                          Pending Verification
-                        </span>
+              <div key={verification._id} className="bg-gray-800 rounded-xl border border-gray-700 p-6">
+
+                <div className="flex flex-col lg:flex-row gap-6">
+
+                  {/* Details */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      Payment ID: {verification.paymentId?._id}
+                    </h3>
+                    <p className="text-gray-400 mb-4">
+                      Invoice: {verification.invoiceId?.invoiceNumber}
+                    </p>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                      <div>
+                        <p className="text-gray-400">Student</p>
+                        <p className="text-white">{verification.invoiceId?.studentName}</p>
                       </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Student Name</p>
-                          <p className="font-semibold text-gray-900">
-                            {verification.invoiceId?.studentName}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Student ID</p>
-                          <p className="font-semibold text-gray-900">
-                            {verification.invoiceId?.studentId}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Amount</p>
-                          <p className="font-semibold text-gray-900">
-                            {formatCurrency(verification.paymentId?.amount || 0)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Bank Name</p>
-                          <p className="font-semibold text-gray-900">
-                            {verification.bankTransferDetails?.bankName}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Transaction Ref</p>
-                          <p className="font-semibold text-gray-900">
-                            {verification.bankTransferDetails?.transactionReference}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Transfer Date</p>
-                          <p className="font-semibold text-gray-900">
-                            {new Date(verification.bankTransferDetails?.transferDate).toLocaleDateString('en-GB')}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-gray-400">Student ID</p>
+                        <p className="text-white">{verification.invoiceId?.studentId}</p>
                       </div>
-
-                      {/* Receipt Image */}
-                      {verification.bankTransferDetails?.receiptImage && (
-                        <div className="mb-4">
-                          <p className="text-sm font-semibold text-gray-700 mb-2">Transfer Receipt:</p>
-                          <div className="border border-gray-300 rounded-lg p-2 inline-block">
-                            <img
-                              src={`http://localhost:5000${verification.bankTransferDetails.receiptImage}`}
-                              alt="Transfer receipt"
-                              className="max-w-full h-auto max-h-96 rounded cursor-pointer"
-                              onClick={() => window.open(`http://localhost:5000${verification.bankTransferDetails.receiptImage}`, '_blank')}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Verification Notes Input */}
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Verification Notes (Optional)
-                        </label>
-                        <textarea
-                          value={selectedPayment === verification._id ? verificationNotes : ''}
-                          onChange={(e) => {
-                            setSelectedPayment(verification._id);
-                            setVerificationNotes(e.target.value);
-                          }}
-                          rows="3"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          placeholder="Add any notes about this verification..."
-                        />
+                      <div>
+                        <p className="text-gray-400">Amount</p>
+                        <p className="text-white">{formatCurrency(verification.paymentId?.amount || 0)}</p>
                       </div>
                     </div>
 
-                    {/* Right Side - Actions */}
-                    <div className="lg:w-48 flex lg:flex-col gap-3">
-                      <button
-                        onClick={() => handleVerify(verification._id, 'Verified')}
-                        disabled={processing === verification._id}
-                        className="flex-1 lg:flex-none flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {processing === verification._id ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        ) : (
-                          <>
-                            <CheckCircle className="w-5 h-5 mr-2" />
-                            Approve
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleVerify(verification._id, 'Rejected')}
-                        disabled={processing === verification._id}
-                        className="flex-1 lg:flex-none flex items-center justify-center px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {processing === verification._id ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        ) : (
-                          <>
-                            <XCircle className="w-5 h-5 mr-2" />
-                            Reject
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    {/* Notes */}
+                    <textarea
+                      value={selectedPayment === verification._id ? verificationNotes : ''}
+                      onChange={(e) => {
+                        setSelectedPayment(verification._id);
+                        setVerificationNotes(e.target.value);
+                      }}
+                      rows="3"
+                      className="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                      placeholder="Add notes..."
+                    />
                   </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-3 w-full lg:w-40">
+                    <button
+                      onClick={() => handleVerify(verification._id, 'Verified')}
+                      disabled={processing === verification._id}
+                      className="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg flex items-center justify-center"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Approve
+                    </button>
+
+                    <button
+                      onClick={() => handleVerify(verification._id, 'Rejected')}
+                      disabled={processing === verification._id}
+                      className="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg flex items-center justify-center"
+                    >
+                      <XCircle className="w-4 h-4 mr-1" />
+                      Reject
+                    </button>
+                  </div>
+
                 </div>
               </div>
             ))}

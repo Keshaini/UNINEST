@@ -41,24 +41,22 @@ function Dashboard() {
 
   const COLORS = ['#22c55e', '#ef4444', '#facc15'];
 
-  if (!stats) return <div>Loading...</div>;
+  if (!stats) return <div className="text-white p-6">Loading...</div>;
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-[#0a0c10] text-slate-300">
 
       {/* ================= SIDEBAR ================= */}
-      <div className="w-64 bg-white shadow-lg p-5">
-        <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
+      <div className="w-64 bg-[#111827] border-r border-gray-800 p-5">
+        <h2 className="text-xl font-bold mb-6 text-white">Admin Panel</h2>
 
         <nav className="space-y-3">
-
           <NavItem label="Dashboard" onClick={() => navigate('/admin/dashboard')} />
           <NavItem label="Invoices" onClick={() => navigate('/admin/invoices')} />
           <NavItem label="Create Invoice" onClick={() => navigate('/admin/invoice/create')} />
           <NavItem label="Verify Payments" onClick={() => navigate('/admin/verifications')} />
           <NavItem label="Discounts" onClick={() => navigate('/admin/discounts')} />
           <NavItem label="Reports" onClick={() => navigate('/admin/reports')} />
-
         </nav>
       </div>
 
@@ -67,11 +65,11 @@ function Dashboard() {
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
 
           <button
             onClick={() => navigate('/admin/invoice/create')}
-            className="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-2"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center gap-2"
           >
             <PlusCircle size={18} />
             Create Invoice
@@ -80,12 +78,10 @@ function Dashboard() {
 
         {/* QUICK ACTIONS */}
         <div className="grid md:grid-cols-4 gap-4 mb-6">
-
           <ActionCard label="Manage Invoices" icon={<FileText />} onClick={() => navigate('/admin/invoices')} />
           <ActionCard label="Verify Payments" icon={<Clock />} onClick={() => navigate('/admin/verifications')} />
           <ActionCard label="Discounts" icon={<Percent />} onClick={() => navigate('/admin/discounts')} />
           <ActionCard label="Reports" icon={<BarChart3 />} onClick={() => navigate('/admin/reports')} />
-
         </div>
 
         {/* STATS */}
@@ -99,8 +95,8 @@ function Dashboard() {
         {/* CHARTS */}
         <div className="grid md:grid-cols-2 gap-6">
 
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="mb-3">Invoice Status</h2>
+          <div className="bg-[#111827] p-4 rounded-xl border border-gray-800 shadow">
+            <h2 className="mb-3 text-white">Invoice Status</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={stats.invoicesByStatus} dataKey="count" nameKey="_id">
@@ -114,14 +110,14 @@ function Dashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="mb-3">Monthly Revenue</h2>
+          <div className="bg-[#111827] p-4 rounded-xl border border-gray-800 shadow">
+            <h2 className="mb-3 text-white">Monthly Revenue</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.monthlyTrend}>
-                <XAxis dataKey="month" />
-                <YAxis />
+                <XAxis dataKey="month" stroke="#ccc" />
+                <YAxis stroke="#ccc" />
                 <Tooltip />
-                <Bar dataKey="amount" />
+                <Bar dataKey="amount" fill="#6366f1" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -138,7 +134,7 @@ function Dashboard() {
 const NavItem = ({ label, onClick }) => (
   <div
     onClick={onClick}
-    className="cursor-pointer p-2 rounded hover:bg-gray-100 text-gray-700"
+    className="cursor-pointer p-2 rounded text-gray-300 hover:bg-gray-800 hover:text-white transition"
   >
     {label}
   </div>
@@ -147,20 +143,20 @@ const NavItem = ({ label, onClick }) => (
 const ActionCard = ({ label, icon, onClick }) => (
   <div
     onClick={onClick}
-    className="bg-white p-4 rounded shadow cursor-pointer hover:shadow-lg flex items-center gap-3"
+    className="bg-[#111827] border border-gray-800 p-4 rounded-xl cursor-pointer hover:shadow-lg hover:bg-gray-800 flex items-center gap-3 transition"
   >
     {icon}
-    <p className="font-medium">{label}</p>
+    <p className="font-medium text-white">{label}</p>
   </div>
 );
 
 const Card = ({ label, value, icon }) => (
-  <div className="bg-white p-4 rounded shadow flex justify-between">
+  <div className="bg-[#111827] border border-gray-800 p-4 rounded-xl flex justify-between items-center shadow">
     <div>
-      <p>{label}</p>
-      <h2 className="text-xl font-bold">{value}</h2>
+      <p className="text-gray-400">{label}</p>
+      <h2 className="text-xl font-bold text-white">{value}</h2>
     </div>
-    {icon}
+    <div className="text-indigo-400">{icon}</div>
   </div>
 );
 
