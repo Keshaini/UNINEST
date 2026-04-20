@@ -169,11 +169,11 @@ function Navbar() {
           {/* User Profile Section */}
           <div className="hidden md:flex items-center space-x-3">
             <div className="text-right">
-              <p className="text-sm font-semibold text-gray-900">Student Portal</p>
-              <p className="text-xs text-gray-500">Sarah Johnson - IT23123456</p>
+              <p className="text-sm font-semibold text-gray-900">Admin Portal</p>
+              <p className="text-xs text-gray-500">System Admin</p>
             </div>
             <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-              SJ
+              SA
             </div>
           </div>
 
