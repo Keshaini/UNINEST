@@ -22,28 +22,8 @@ api.interceptors.request.use((config) => {
 // ========== INVOICE SERVICES ==========
 
 export const getInvoices = async () => {
-  return {
-    data: [
-      {
-        _id: "1",
-        invoiceNumber: "INV-001",
-        studentName: "Keshaini",
-        totalAmount: 15000,
-        amountPaid: 5000,
-        outstandingBalance: 10000,
-        status: "Pending"
-      },
-      {
-        _id: "2",
-        invoiceNumber: "INV-002",
-        studentName: "John Doe",
-        totalAmount: 20000,
-        amountPaid: 20000,
-        outstandingBalance: 0,
-        status: "Paid"
-      }
-    ]
-  };
+  const response = await api.get('/invoice'); 
+  return response.data;
 };
 
 export const getInvoiceById = async (id) => {
@@ -52,7 +32,7 @@ export const getInvoiceById = async (id) => {
 };
 
 export const createInvoice = async (invoiceData) => {
-  const response = await api.post('/invoice', invoiceData);
+  const response = await api.post('/admin/invoices', invoiceData);
   return response.data;
 };
 
@@ -155,8 +135,33 @@ export const getDashboardStats = async () => {
 };
 
 export const getPendingVerifications = async () => {
-  const response = await api.get('/admin/verifications/pending');
-  return response.data;
+  try {
+    const response = await api.get('/admin/verifications/pending');
+    return response.data;
+  } catch (error) {
+    console.warn("⚠️ Backend not available → using mock data");
+
+    // ✅ MOCK DATA (temporary)
+    return {
+      data: [
+        {
+          _id: "1",
+          paymentId: { _id: "PAY001", amount: 25000 },
+          invoiceId: {
+            invoiceNumber: "INV-001",
+            studentName: "Kamal Perera",
+            studentId: "IT20231234"
+          },
+          bankTransferDetails: {
+            bankName: "BOC",
+            transactionReference: "TRX123456",
+            transferDate: new Date(),
+            receiptImage: ""
+          }
+        }
+      ]
+    };
+  }
 };
 
 export const verifyBankTransfer = async (id, data) => {
