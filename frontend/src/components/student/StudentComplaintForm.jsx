@@ -1,3 +1,4 @@
+import { Headset, LayoutGrid, MessageSquareText, ShieldCheck, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CATEGORY_LABEL, CATEGORY_OPTIONS, PRIORITY_LABEL, PRIORITY_OPTIONS } from '../../data/complaintData';
 import { isComplaintFormComplete } from '../../common/utils/complaintFormValidation';
@@ -21,6 +22,12 @@ const StudentComplaintForm = ({ formData, setFormData, onSubmit, submitting, cur
   const hasDescription = descriptionLength > 0;
   const hasDescriptionError = hasDescription && descriptionLength < DESCRIPTION_MIN_LENGTH;
   const canSubmit = isFormComplete && !hasDescriptionError && !submitting;
+  const submitStatusTone = !isFormComplete || hasDescriptionError ? 'warning' : 'ready';
+  const submitStatusMessage = !isFormComplete
+    ? 'Fill all fields to enable ticket submission.'
+    : hasDescriptionError
+      ? `Description needs at least ${DESCRIPTION_MIN_LENGTH} characters.`
+      : 'Looks good. Your ticket will appear in My Tickets right after submission.';
 
   const handleSubmit = (event) => {
     if (!canSubmit) {
@@ -33,9 +40,32 @@ const StudentComplaintForm = ({ formData, setFormData, onSubmit, submitting, cur
 
   return (
     <article className="panel form-panel reveal">
-      <header className="panel-header">
-        <h2>Chat to our team</h2>
-        <p>Report room, facilities, or safety issues and UniNest support will follow up quickly.</p>
+      <header className="panel-header form-hero">
+        <div className="form-hero-copy">
+          <span className="form-eyebrow">Student Support Desk</span>
+          <h2>Chat to our team</h2>
+          <p>Report room, facilities, or safety issues and UniNest support will follow up quickly.</p>
+          <div className="form-hero-tags" aria-label="Support highlights">
+            <span className="hero-tag">
+              <ShieldCheck size={15} strokeWidth={2.2} aria-hidden="true" />
+              Verified profile
+            </span>
+            <span className="hero-tag">
+              <Headset size={15} strokeWidth={2.2} aria-hidden="true" />
+              Fast hostel follow-up
+            </span>
+          </div>
+        </div>
+
+        <aside className="form-hero-side" aria-label="Ticket summary">
+          <span className="hero-side-label">Current selection</span>
+          <strong className="hero-side-value">{PRIORITY_LABEL[formData.priority]}</strong>
+          <p className="hero-side-copy">{PRIORITY_HELP_TEXT[formData.priority]}</p>
+          <div className="hero-side-meta">
+            <span>{CATEGORY_LABEL[formData.category]}</span>
+            <span>{currentStudentId ? 'Synced account' : 'Manual profile'}</span>
+          </div>
+        </aside>
       </header>
 
       {hasFeedback ? (
@@ -49,116 +79,165 @@ const StudentComplaintForm = ({ formData, setFormData, onSubmit, submitting, cur
       ) : null}
 
       <form className="complaint-form" onSubmit={handleSubmit}>
-        <div className="form-grid">
-          <div className="form-row">
-            <label htmlFor="studentId">Student ID</label>
-            <input
-              id="studentId"
-              value={formData.studentId}
-              onChange={updateField(setFormData, 'studentId')}
-              placeholder="ex: STU-001"
-              required
-              disabled={Boolean(currentStudentId)}
-            />
-            {currentStudentId ? <span className="lock-note">Student ID is locked to your account.</span> : null}
-          </div>
-
-          <div className="form-row">
-            <label htmlFor="studentName">Student Name</label>
-            <input
-              id="studentName"
-              value={formData.studentName}
-              onChange={updateField(setFormData, 'studentName')}
-              placeholder="Your full name"
-              required
-              disabled={isStudentNameLocked}
-            />
-            {isStudentNameLocked ? <span className="lock-note">Student name is synced to your account.</span> : null}
-          </div>
-
-          <div className="form-row">
-            <label htmlFor="roomNumber">Room Number</label>
-            <input
-              id="roomNumber"
-              value={formData.roomNumber}
-              onChange={updateField(setFormData, 'roomNumber')}
-              placeholder="Room / Floor"
-              required
-            />
-          </div>
-
-          <div className="form-row">
-            <label htmlFor="title">Issue Title</label>
-            <input
-              id="title"
-              value={formData.title}
-              onChange={updateField(setFormData, 'title')}
-              placeholder="Short title for the issue"
-              required
-            />
-          </div>
-
-          <div className="form-row">
-            <label htmlFor="category">Category</label>
-            <select id="category" value={formData.category} onChange={updateField(setFormData, 'category')} required>
-              {CATEGORY_OPTIONS.map((category) => (
-                <option key={category} value={category}>
-                  {CATEGORY_LABEL[category]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={`form-row wide-field${hasDescriptionError ? ' has-error' : ''}`}>
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              rows={3}
-              value={formData.description}
-              onChange={updateField(setFormData, 'description')}
-              placeholder="Add complete details to help support resolve quickly."
-              minLength={DESCRIPTION_MIN_LENGTH}
-              aria-invalid={hasDescriptionError}
-              required
-            />
-            <span className={`field-validation-note${hasDescriptionError ? ' error' : ''}`}>
-              {hasDescriptionError
-                ? `Description must be at least ${DESCRIPTION_MIN_LENGTH} characters.`
-                : `Minimum ${DESCRIPTION_MIN_LENGTH} characters.`}
-            </span>
-          </div>
-
-          <fieldset className="priority-options wide-field">
-            <legend>Priority level</legend>
-            <div className="priority-grid">
-              {PRIORITY_OPTIONS.map((priority) => (
-                <label key={priority} className={`priority-card${formData.priority === priority ? ' active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="priority"
-                    value={priority}
-                    checked={formData.priority === priority}
-                    onChange={updateField(setFormData, 'priority')}
-                  />
-                  <span className="priority-title">{PRIORITY_LABEL[priority]}</span>
-                  <span className="priority-copy">{PRIORITY_HELP_TEXT[priority]}</span>
-                </label>
-              ))}
+        <div className="form-stack">
+          <section className="form-section">
+            <div className="section-heading">
+              <span className="section-icon" aria-hidden="true">
+                <UserRound size={18} strokeWidth={2.2} />
+              </span>
+              <div className="section-copy">
+                <span className="section-kicker">Profile</span>
+                <h3>Student details</h3>
+                <p>We use these details to connect your request with the right hostel team.</p>
+              </div>
             </div>
-          </fieldset>
+
+            <div className="section-grid section-grid-profile">
+              <div className="form-row">
+                <label htmlFor="studentId">Student ID</label>
+                <input
+                  id="studentId"
+                  value={formData.studentId}
+                  onChange={updateField(setFormData, 'studentId')}
+                  placeholder="ex: STU-001"
+                  required
+                  disabled={Boolean(currentStudentId)}
+                />
+                {currentStudentId ? <span className="lock-note">Student ID is locked to your account.</span> : null}
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="studentName">Student Name</label>
+                <input
+                  id="studentName"
+                  value={formData.studentName}
+                  onChange={updateField(setFormData, 'studentName')}
+                  placeholder="Your full name"
+                  required
+                  disabled={isStudentNameLocked}
+                />
+                {isStudentNameLocked ? <span className="lock-note">Student name is synced to your account.</span> : null}
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="roomNumber">Room Number</label>
+                <input
+                  id="roomNumber"
+                  value={formData.roomNumber}
+                  onChange={updateField(setFormData, 'roomNumber')}
+                  placeholder="Room / Floor"
+                  required
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="form-section">
+            <div className="section-heading">
+              <span className="section-icon" aria-hidden="true">
+                <MessageSquareText size={18} strokeWidth={2.2} />
+              </span>
+              <div className="section-copy">
+                <span className="section-kicker">Issue</span>
+                <h3>What happened?</h3>
+                <p>Clear details help support respond faster and route the ticket correctly.</p>
+              </div>
+            </div>
+
+            <div className="section-grid section-grid-issue">
+              <div className="form-row">
+                <label htmlFor="title">Issue Title</label>
+                <input
+                  id="title"
+                  value={formData.title}
+                  onChange={updateField(setFormData, 'title')}
+                  placeholder="Short title for the issue"
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <label htmlFor="category">Category</label>
+                <select id="category" value={formData.category} onChange={updateField(setFormData, 'category')} required>
+                  {CATEGORY_OPTIONS.map((category) => (
+                    <option key={category} value={category}>
+                      {CATEGORY_LABEL[category]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={`form-row form-row-description${hasDescriptionError ? ' has-error' : ''}`}>
+                <label htmlFor="description">Description</label>
+                <textarea
+                  id="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={updateField(setFormData, 'description')}
+                  placeholder="Add complete details to help support resolve quickly."
+                  minLength={DESCRIPTION_MIN_LENGTH}
+                  aria-invalid={hasDescriptionError}
+                  required
+                />
+                <div className="field-meta">
+                  <span className={`field-validation-note${hasDescriptionError ? ' error' : ''}`}>
+                    {hasDescriptionError
+                      ? `Description must be at least ${DESCRIPTION_MIN_LENGTH} characters.`
+                      : `Minimum ${DESCRIPTION_MIN_LENGTH} characters.`}
+                  </span>
+                  <span className={`field-counter${hasDescriptionError ? ' error' : ''}`}>{descriptionLength} chars</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="form-section priority-section">
+            <div className="section-heading">
+              <span className="section-icon" aria-hidden="true">
+                <LayoutGrid size={18} strokeWidth={2.2} />
+              </span>
+              <div className="section-copy">
+                <span className="section-kicker">Priority</span>
+                <h3>Choose the urgency</h3>
+                <p>Set the level that best matches the impact of this issue.</p>
+              </div>
+            </div>
+
+            <fieldset className="priority-options">
+              <legend className="priority-legend">Priority level</legend>
+              <div className="priority-grid">
+                {PRIORITY_OPTIONS.map((priority) => (
+                  <label key={priority} className={`priority-card${formData.priority === priority ? ' active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="priority"
+                      value={priority}
+                      checked={formData.priority === priority}
+                      onChange={updateField(setFormData, 'priority')}
+                    />
+                    <span className="priority-title">{PRIORITY_LABEL[priority]}</span>
+                    <span className="priority-copy">{PRIORITY_HELP_TEXT[priority]}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </section>
         </div>
 
-        <div className="form-actions">
-          {!isFormComplete ? <p className="form-validation-note">Fill all fields to enable ticket submission.</p> : null}
-          {isFormComplete && hasDescriptionError ? (
-            <p className="form-validation-note">Description needs at least 10 characters.</p>
-          ) : null}
-          <button className="primary-btn" type="submit" disabled={!canSubmit}>
-            {submitting ? 'Submitting...' : 'Get in touch'}
-          </button>
-          <button className="ghost-btn" type="button" onClick={() => navigate('/complaints/student/tickets')}>
-            Open My Tickets
-          </button>
+        <div className={`form-submit-bar ${submitStatusTone}`}>
+          <div className="submit-status">
+            <span className="submit-status-label">Submission status</span>
+            <p className="submit-status-message">{submitStatusMessage}</p>
+          </div>
+
+          <div className="form-actions">
+            <button className="primary-btn" type="submit" disabled={!canSubmit}>
+              {submitting ? 'Submitting...' : 'Get in touch'}
+            </button>
+            <button className="ghost-btn" type="button" onClick={() => navigate('/complaints/student/tickets')}>
+              Open My Tickets
+            </button>
+          </div>
         </div>
       </form>
     </article>
