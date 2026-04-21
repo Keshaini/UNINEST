@@ -1,0 +1,81 @@
+.support-panel .complaint-list {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.support-panel .empty-state {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.support-panel .complaint-card {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 0.8rem;
+  background: #ffffff;
+}
+
+.support-panel .complaint-card h3 {
+  margin: 0.5rem 0 0.32rem;
+  font-size: 1.02rem;
+}
+
+.support-panel .complaint-card p {
+  margin: 0;
+  color: #2d3a45;
+}
+
+.support-panel .complaint-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.support-panel .subtext {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.support-panel .chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.support-panel .chip {
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+}
+
+.support-panel .status-pending { background: #fff1d8; color: #955d00; }
+.support-panel .status-in_progress { background: #dbe8ff; color: #1a4e9f; }
+.support-panel .status-resolved { background: #dff3ea; color: #0b6a45; }
+.support-panel .status-rejected { background: #fbe2de; color: #9d2414; }
+.support-panel .priority-low { background: #e7f6fb; color: #1b6e88; }
+.support-panel .priority-medium { background: #e7e9fa; color: #424c9e; }
+.support-panel .priority-high { background: #fdf0d9; color: #9a6610; }
+.support-panel .priority-urgent { background: #fddfd9; color: #9a2715; }
+
+.support-panel .support-edit-grid {
+  margin-top: 0.5rem;
+}
+
+.support-panel .action-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.65rem;
+}
+
+.support-panel .meta-grid {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.2rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}

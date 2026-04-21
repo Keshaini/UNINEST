@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import { Megaphone, Users, AlertCircle, Clock, Calendar, Search, Filter, Loader2, Send } from 'lucide-react';
 
 const ManageNotices = () => {
     const [notices, setNotices] = useState([]);
     const [form, setForm] = useState({ title: '', content: '', targetAudience: 'All', priority: 'Normal' });
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchNotices = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('adminToken');
             const res = await axios.get('http://localhost:5000/api/notices', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotices(res.data);
-            setLoading(false);
         } catch (err) {
-            console.warn('Failed to fetch notices', err);
+            toast.error('Failed to load official notices');
+        } finally {
             setLoading(false);
         }
     };
@@ -27,74 +31,158 @@ const ManageNotices = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setIsSubmitting(true);
             const token = localStorage.getItem('adminToken');
             await axios.post('http://localhost:5000/api/notices', form, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            toast.success('Notice distributed successfully!');
             setForm({ title: '', content: '', targetAudience: 'All', priority: 'Normal' });
-            fetchNotices(); // refresh
+            fetchNotices();
         } catch (err) {
-            alert(err.response?.data?.msg || 'Failed to post notice');
+            toast.error(err.response?.data?.msg || 'Failed to post notice');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="glass-container animate-fade-in">
-            <h2 style={{ marginBottom: '1.5rem' }}>Broadcast Notices</h2>
+        <div className="animate-fade-in text-slate-200">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h2 className="text-3xl font-bold text-white tracking-tight">Official Notices</h2>
+                    <p className="text-slate-400 mt-1">Broadcast announcements to students and staff across the hostel.</p>
+                </div>
+            </div>
 
-            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label>Notice Title</label>
-                    <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
-                </div>
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                    <label>Content</label>
-                    <textarea rows="3" value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} required style={{width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-main)', resize: 'vertical'}}></textarea>
-                </div>
-                <div className="form-group">
-                    <label>Target Audience</label>
-                    <select value={form.targetAudience} onChange={e => setForm({ ...form, targetAudience: e.target.value })} style={{width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'transparent', color: '#000'}}>
-                        <option value="All">All Entities</option>
-                        <option value="Students">Only Students</option>
-                        <option value="Staff">Only Staff</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label>Priority</label>
-                    <select value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })} style={{width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--glass-border)', background: 'transparent', color: '#000'}}>
-                        <option value="Low">Low</option>
-                        <option value="Normal">Normal</option>
-                        <option value="High">High (Alert)</option>
-                    </select>
-                </div>
-                <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button type="submit" className="btn-primary" style={{ minWidth: '150px' }}>Post Notice</button>
-                </div>
-            </form>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Form Wing */}
+                <div className="lg:col-span-12 xl:col-span-5 bg-slate-900 border border-slate-800 rounded-[32px] p-8 shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-focus-within:bg-indigo-500/10 transition-colors"></div>
+                    
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                            <Megaphone className="text-indigo-400 w-5 h-5" />
+                        </div>
+                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">Broadcast Transmitter</h3>
+                    </div>
 
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)' }}>
-                            <th style={{ padding: '1rem' }}>Title</th>
-                            <th style={{ padding: '1rem' }}>Audience</th>
-                            <th style={{ padding: '1rem' }}>Priority</th>
-                            <th style={{ padding: '1rem' }}>Date Posted</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? <tr><td colSpan="4" style={{ padding: '1rem', textAlign: 'center' }}>Loading...</td></tr> : notices.map(notice => (
-                            <tr key={notice._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>{notice.title}</td>
-                                <td style={{ padding: '1rem' }}>{notice.targetAudience}</td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span className={`badge ${notice.priority === 'High' ? 'high' : 'open'}`}>{notice.priority}</span>
-                                </td>
-                                <td style={{ padding: '1rem' }}>{new Date(notice.createdAt).toLocaleDateString()}</td>
-                            </tr>
+                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Announcement Title</label>
+                            <input 
+                                type="text" 
+                                value={form.title} 
+                                onChange={e => setForm({ ...form, title: e.target.value })} 
+                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3.5 text-slate-200 focus:border-indigo-500 outline-none transition-all font-medium" 
+                                placeholder="E.g. Room Inspection Schedule" 
+                                required 
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Notice Content</label>
+                            <textarea 
+                                rows="4" 
+                                value={form.content} 
+                                onChange={e => setForm({ ...form, content: e.target.value })} 
+                                className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3.5 text-slate-200 focus:border-indigo-500 outline-none transition-all font-medium resize-none shadow-inner" 
+                                placeholder="Detail the announcement for the target audience..."
+                                required
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Target Audience</label>
+                                <select 
+                                    value={form.targetAudience} 
+                                    onChange={e => setForm({ ...form, targetAudience: e.target.value })} 
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3.5 text-slate-200 focus:border-indigo-500 outline-none transition-all font-medium appearance-none cursor-pointer"
+                                >
+                                    <option value="All">All Entities</option>
+                                    <option value="Students">Only Students</option>
+                                    <option value="Staff">Only Staff</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Notice Priority</label>
+                                <select 
+                                    value={form.priority} 
+                                    onChange={e => setForm({ ...form, priority: e.target.value })} 
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-3.5 text-slate-200 focus:border-indigo-500 outline-none transition-all font-medium appearance-none cursor-pointer"
+                                >
+                                    <option value="Low">Low</option>
+                                    <option value="Normal">Normal</option>
+                                    <option value="High">High (Urgent)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={isSubmitting}
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-indigo-500/20 transition-all flex items-center justify-center gap-3 active:scale-95"
+                        >
+                            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+                            {isSubmitting ? 'Distributing...' : 'Broadcast Notice'}
+                        </button>
+                    </form>
+                </div>
+
+                {/* History List Wing */}
+                <div className="lg:col-span-12 xl:col-span-7 space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                         <h3 className="text-xl font-bold text-white flex items-center gap-3 uppercase text-xs tracking-[0.2em] text-slate-500 font-bold">
+                            <Clock className="w-4 h-4" /> 
+                            Recent Broadcast History
+                         </h3>
+                    </div>
+
+                    <div className="space-y-4">
+                        {loading ? (
+                            <div className="p-20 text-center bg-slate-900 border border-dashed border-slate-800 rounded-[32px]">
+                                <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mx-auto mb-4" />
+                                <p className="text-xs font-bold text-slate-500 text-uppercase tracking-widest uppercase">Hydrating Notice Board...</p>
+                            </div>
+                        ) : notices.length === 0 ? (
+                            <div className="p-20 text-center bg-slate-900 border border-dashed border-slate-800 rounded-[32px]">
+                                <Megaphone className="w-8 h-8 text-slate-800 mx-auto mb-4" />
+                                <p className="text-slate-600 font-bold tracking-widest uppercase text-xs">No active broadcasts detected.</p>
+                            </div>
+                        ) : notices.map(notice => (
+                            <div key={notice._id} className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 hover:border-slate-700 transition-all shadow-xl group">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-2 h-2 rounded-full ${notice.priority === 'High' ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-indigo-500'}`}></div>
+                                        <h4 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{notice.title}</h4>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                                            notice.priority === 'High' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 'bg-slate-800 text-slate-400 border-slate-700'
+                                        }`}>
+                                            {notice.priority}
+                                        </span>
+                                        <span className="px-3 py-1 bg-indigo-500/10 text-indigo-300 text-[10px] font-bold uppercase tracking-widest rounded-full border border-indigo-500/20">
+                                            {notice.targetAudience}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-slate-400 leading-relaxed font-medium mb-6 line-clamp-2 italic">"{notice.content}"</p>
+                                <div className="flex items-center gap-6 pt-4 border-t border-slate-800/50">
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                        <Calendar className="w-3.5 h-3.5" />
+                                        {new Date(notice.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Users className="w-3.5 h-3.5" />
+                                        Active Notice
+                                    </div>
+                                </div>
+                            </div>
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                </div>
             </div>
         </div>
     );

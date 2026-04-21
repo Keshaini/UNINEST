@@ -1,53 +1,72 @@
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build outputs
-dist/
-build/
-.next/
-out/
-*.js.map
-
-# IDE & Editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# Testing
-coverage/
-.nyc_output/
-
 # Logs
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# OS
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Pids
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# Build outputs
+dist/
+build/
+build/Release/
+out/
+.next/
+.nuxt/
+*.js.map
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE & Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.eslintcache
+.stylelintcache
+
+# OS specific files
 .DS_Store
+.DS_Store?
+._*
 .AppleDouble
 .LSOverride
 Thumbs.db
 Desktop.ini
 
-# Uploads (if they contain user data)
+# Uploads & User Data
 backend/uploads/*
 !backend/uploads/.gitkeep
 
-# Misc
+# Misc / Caches
 .cache/
 temp/
 tmp/

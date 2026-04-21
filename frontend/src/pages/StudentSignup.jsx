@@ -19,25 +19,50 @@ const InputField = ({ icon: Icon, type, name, placeholder, label, value, errorMs
                 {label}
             </label>
             <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                     <Icon className={`w-5 h-5 ${hasError ? 'text-rose-400' : isFocused ? 'text-indigo-400' : 'text-slate-500'} transition-colors`} />
                 </div>
-                <input
-                    type={actualType}
-                    name={name}
-                    placeholder={placeholder}
-                    value={value}
-                    onChange={onChange}
-                    onFocus={() => onFocus(name)}
-                    onBlur={onBlur}
-                    required
-                    className={`w-full bg-slate-800/50 text-slate-100 rounded-xl pl-10 pr-10 py-3 outline-none transition-all duration-300 border backdrop-blur-sm
-                        ${hasError 
-                            ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)] focus:border-rose-500 focus:shadow-[0_0_20px_rgba(244,63,94,0.2)]' 
-                            : 'border-slate-700/50 focus:border-indigo-500/80 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:border-slate-600'
-                        }
-                    `}
-                />
+                
+                {name === 'course' ? (
+                    <select
+                        name={name}
+                        value={value}
+                        onChange={onChange}
+                        onFocus={() => onFocus(name)}
+                        onBlur={onBlur}
+                        required
+                        className={`w-full bg-slate-800/50 text-slate-100 rounded-xl pl-10 pr-10 py-3 outline-none transition-all duration-300 border backdrop-blur-sm appearance-none cursor-pointer
+                            ${hasError 
+                                ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)] focus:border-rose-500 focus:shadow-[0_0_20px_rgba(244,63,94,0.2)]' 
+                                : 'border-slate-700/50 focus:border-indigo-500/80 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:border-slate-600'
+                            }
+                        `}
+                    >
+                        <option value="" disabled className="bg-slate-900 text-slate-500">Select Course</option>
+                        <option value="IT" className="bg-slate-900 border-none">IT</option>
+                        <option value="Engineering" className="bg-slate-900 border-none">Engineering</option>
+                        <option value="Biomedical" className="bg-slate-900 border-none">Biomedical</option>
+                        <option value="Business" className="bg-slate-900 border-none">Business</option>
+                    </select>
+                ) : (
+                    <input
+                        type={actualType}
+                        name={name}
+                        placeholder={placeholder}
+                        value={value}
+                        onChange={onChange}
+                        onFocus={() => onFocus(name)}
+                        onBlur={onBlur}
+                        required
+                        className={`w-full bg-slate-800/50 text-slate-100 rounded-xl pl-10 pr-10 py-3 outline-none transition-all duration-300 border backdrop-blur-sm
+                            ${hasError 
+                                ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)] focus:border-rose-500 focus:shadow-[0_0_20px_rgba(244,63,94,0.2)]' 
+                                : 'border-slate-700/50 focus:border-indigo-500/80 focus:shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:border-slate-600'
+                            }
+                        `}
+                    />
+                )}
+
                 {type === 'password' && (
                     <button 
                         type="button" 
@@ -46,6 +71,14 @@ const InputField = ({ icon: Icon, type, name, placeholder, label, value, errorMs
                     >
                         {(name === 'password' ? showPassword : showConfirmPassword) ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
                     </button>
+                )}
+                
+                {name === 'course' && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-500">
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                        </svg>
+                    </div>
                 )}
             </div>
             {hasError && <p className="text-xs text-rose-400 pl-1 animate-fade-in">{errorMsg}</p>}
@@ -179,7 +212,7 @@ function StudentSignup() {
                     
                     <div className="relative z-10">
                         <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 shadow-lg text-white font-bold text-xl mb-6">
-                            S
+                            UNINEST STUDENT PORTAL
                         </div>
                         <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 leading-tight mb-4">
                             Welcome to your<br/>Smart Hostel.

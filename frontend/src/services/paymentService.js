@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Add auth token to requests (when available)
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token') || localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,65 +21,91 @@ api.interceptors.request.use((config) => {
 
 // ========== INVOICE SERVICES ==========
 
-export const getInvoices = async () => {
-  return {
-    data: [
-      {
-        _id: "1",
-        invoiceNumber: "INV-001",
-        studentName: "Keshaini",
-        totalAmount: 15000,
-        amountPaid: 5000,
-        outstandingBalance: 10000,
-        status: "Pending"
-      },
-      {
-        _id: "2",
-        invoiceNumber: "INV-002",
-        studentName: "John Doe",
-        totalAmount: 20000,
-        amountPaid: 20000,
-        outstandingBalance: 0,
-        status: "Paid"
-      }
-    ]
-  };
+export const getInvoices = async (params = {}) => {
+  try {
+    const response = await api.get('/invoices', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+    return { success: false, data: [], message: error.response?.data?.message || 'Failed to fetch invoices' };
+  }
+};
+
+export const getStudentInvoices = async (studentId, params = {}) => {
+  try {
+    const response = await api.get('/invoices', { 
+      params: { 
+        studentId,
+        ...params 
+      } 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching student invoices:', error);
+    return { success: false, data: [], message: error.response?.data?.message || 'Failed to fetch invoices' };
+  }
 };
 
 export const getInvoiceById = async (id) => {
-  const response = await api.get(`/invoice/${id}`);
-  return response.data;
+  try {
+    const response = await api.get(`/invoices/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching invoice:', error);
+    throw error;
+  }
 };
 
 export const createInvoice = async (invoiceData) => {
-  const response = await api.post('/invoice', invoiceData);
-  return response.data;
+  try {
+    const response = await api.post('/invoices', invoiceData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    throw error;
+  }
 };
 
 export const updateInvoice = async (id, updates) => {
-  const response = await api.put(`/invoice/${id}`, updates);
-  return response.data;
+  try {
+    const response = await api.put(`/invoices/${id}`, updates);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating invoice:', error);
+    throw error;
+  }
 };
 
 export const deleteInvoice = async (id) => {
-  const response = await api.delete(`/invoice/${id}`);
-  return response.data;
+  try {
+    const response = await api.delete(`/invoices/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting invoice:', error);
+    throw error;
+  }
 };
 
 // ========== PAYMENT SERVICES ==========
 
-export const processPayment = async (data) => {
-  return {
-    data: {
-      payment: { id: "PAY123", status: "success" },
-      invoice: data
-    }
-  };
+export const processPayment = async (paymentData) => {
+  try {
+    const response = await api.post('/payments', paymentData);
+    return response.data;
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    throw error;
+  }
 };
 
 export const getPayments = async (params = {}) => {
-  const response = await api.get('/payments', { params });
-  return response.data;
+  try {
+    const response = await api.get('/payments', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching payments:', error);
+    return { data: [] };
+  }
 };
 
 export const getPaymentByReceipt = async (receiptNumber) => {
@@ -165,17 +191,32 @@ export const verifyBankTransfer = async (id, data) => {
 };
 
 export const createDiscount = async (discountData) => {
-  const response = await api.post('/admin/discounts', discountData);
+  const response = await api.post('/discounts', discountData);
   return response.data;
 };
 
 export const getDiscounts = async (params = {}) => {
-  const response = await api.get('/admin/discounts', { params });
+  try {
+    const response = await api.get('/discounts', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching discounts:', error);
+    return { data: [] };
+  }
+};
+
+export const updateDiscount = async (id, discountData) => {
+  const response = await api.put(`/discounts/${id}`, discountData);
+  return response.data;
+};
+
+export const deleteDiscount = async (id) => {
+  const response = await api.delete(`/discounts/${id}`);
   return response.data;
 };
 
 export const updateDiscountStatus = async (id, status) => {
-  const response = await api.put(`/admin/discounts/${id}/status`, { status });
+  const response = await api.put(`/discounts/${id}/status`, { status });
   return response.data;
 };
 

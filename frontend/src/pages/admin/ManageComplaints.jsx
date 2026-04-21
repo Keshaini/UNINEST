@@ -1,25 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { 
+    getComplaints, 
+    updateComplaint 
+} from '../../services/complaintsService';
+import { 
+    AlertCircle, 
+    CheckCircle2, 
+    Clock, 
+    Trash2, 
+    ShieldAlert, 
+    RefreshCw, 
+    Search, 
+    Filter, 
+    ChevronRight, 
+    Activity, 
+    MessageSquare,
+    Loader2,
+    Calendar,
+    User,
+    Home,
+    AlertTriangle,
+    Eye
+} from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const ManageComplaints = () => {
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState('all');
 
-    // Fetch every single complaint dynamically via API securely tracking JWT
-    const fetchAllComplaints = async () => {
+    // Fetch all complaints via service
+    const fetchAllComplaints = async (showRefresh = false) => {
         try {
-            const token = localStorage.getItem('adminToken');
-            const res = await axios.get('http://localhost:5000/api/complaints', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setComplaints(res.data);
-            setLoading(false);
+            if (showRefresh) setRefreshing(true);
+            else setLoading(true);
+            
+            const response = await getComplaints();
+            setComplaints(response.data || response);
         } catch (err) {
-            console.warn('Backend disconnected - loading admin mock records.', err.message);
-            setComplaints([
-                { _id: '1', studentId: { firstName: 'John', lastName: 'Doe', registrationNumber: 'REG-101' }, category: 'Electrical', title: 'AC Cooling Issue', status: 'Open', createdAt: '2026-03-11T12:00:00Z' }
-            ]);
+            toast.error('Intelligence Stream Synchronization Failure');
+            setComplaints([]);
+        } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
 
@@ -27,97 +52,232 @@ const ManageComplaints = () => {
         fetchAllComplaints();
     }, []);
 
-    // Dispatch an action tracking the status parameter
+    // Update complaint status
     const updateStatus = async (id, newStatus) => {
+        const previousState = [...complaints];
         try {
-            // Optimistic UI update logic (Fast MERN Best Practice)
-            const previousState = [...complaints];
+            // Optimistic UI update
             setComplaints(complaints.map(c => c._id === id ? { ...c, status: newStatus } : c));
 
-            const token = localStorage.getItem('adminToken');
-            let payload = { status: newStatus };
-
-            if (newStatus === 'Resolved') {
-                payload.adminResponse = 'The maintenance team successfully resolved this request.';
+            const payload = { status: newStatus };
+            if (newStatus === 'resolved') {
+                payload.supportNotes = 'The maintenance team successfully resolved this request.';
             }
 
-            await axios.put(`http://localhost:5000/api/complaints/${id}/status`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
+            await updateComplaint(id, payload);
+            toast.success(`Protocol ${newStatus.replace('_', ' ')} updated.`);
         } catch (err) {
-            console.warn('Update offline failed:', err.message);
-            // In a real failure scenario, roll back the speculative UI here.
+            toast.error('State reconciliation failure.');
+            // Revert UI on error
+            setComplaints(previousState);
         }
     };
 
+    const getStatusStyles = (status) => {
+        switch (status) {
+            case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+            case 'in_progress': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+            case 'resolved': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+            case 'rejected': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+            default: return 'bg-slate-800 text-slate-400 border-slate-700';
+        }
+    };
+
+    const getPriorityStyles = (priority) => {
+        switch (priority) {
+            case 'high': return 'text-rose-500 font-black';
+            case 'medium': return 'text-amber-500 font-bold';
+            case 'low': return 'text-emerald-500 font-bold';
+            default: return 'text-slate-500';
+        }
+    };
+
+    const filteredComplaints = complaints.filter(c => {
+        const matchesSearch = 
+            (c.studentName?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (c.title?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (c.roomNumber?.toLowerCase().includes(searchTerm.toLowerCase()));
+        
+        const matchesFilter = filterStatus === 'all' || c.status === filterStatus;
+        
+        return matchesSearch && matchesFilter;
+    });
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 space-y-6">
+                <Loader2 className="w-16 h-16 text-indigo-500 animate-spin" />
+                <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">Synchronizing Complaint Matrix</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="glass-container animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2 style={{ marginBottom: 0 }}>Student Complaints Matrix</h2>
-                <span style={{ color: 'var(--text-muted)' }}>Tracking Operations</span>
+        <div className="animate-fade-in space-y-12 pb-20">
+            {/* Header Section */}
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl backdrop-blur-md">
+                <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-center">
+                        <AlertTriangle className="w-8 h-8 text-rose-500" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-black text-white tracking-tight">Complaint Matrix</h1>
+                        <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.2em] mt-1 flex items-center gap-2">
+                            <Activity size={12} className="text-emerald-500" />
+                            Live Operational Awareness: {complaints.length} Records
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => fetchAllComplaints(true)}
+                        className={`p-4 bg-slate-950 border border-slate-800 rounded-2xl text-slate-500 hover:text-white transition-all active:scale-95 ${refreshing ? 'animate-spin-slow' : ''}`}
+                    >
+                        <RefreshCw size={18} />
+                    </button>
+                    <div className="bg-slate-950 border border-slate-800 rounded-2xl p-1 flex gap-1">
+                        <FilterButton active={filterStatus === 'all'} onClick={() => setFilterStatus('all')} label="All" />
+                        <FilterButton active={filterStatus === 'pending'} onClick={() => setFilterStatus('pending')} label="Pending" />
+                    </div>
+                </div>
+            </header>
+
+            {/* Filter & Search Bar */}
+            <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="relative group flex-1 w-full">
+                    <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                        <Search className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                    </div>
+                    <input 
+                        type="text" 
+                        placeholder="SEARCH LOGS BY NAME, ROOM, OR INTEL..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-[2rem] pl-16 pr-6 py-4 text-[10px] font-black text-white uppercase tracking-[0.2em] outline-none focus:border-indigo-500/50 transition-all font-sans" 
+                    />
+                </div>
+                
+                <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 p-2 rounded-2xl w-full md:w-auto">
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4 hidden lg:inline">Priority Hierarchy:</span>
+                    <div className="flex gap-1">
+                        <span className="px-3 py-1 text-[9px] font-black uppercase text-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-lg">High</span>
+                        <span className="px-3 py-1 text-[9px] font-black uppercase text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-lg">Medium</span>
+                        <span className="px-3 py-1 text-[9px] font-black uppercase text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">Low</span>
+                    </div>
+                </div>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)' }}>
-                            <th style={{ padding: '1rem' }}>Ref ID</th>
-                            <th style={{ padding: '1rem' }}>Student Details</th>
-                            <th style={{ padding: '1rem' }}>Category</th>
-                            <th style={{ padding: '1rem' }}>Issue Subject</th>
-                            <th style={{ padding: '1rem' }}>Timestamps</th>
-                            <th style={{ padding: '1rem' }}>Status</th>
-                            <th style={{ padding: '1rem' }}>Take Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {loading ? (
-                            <tr><td colSpan="7" style={{ padding: '1rem', textAlign: 'center' }}>Loading...</td></tr>
-                        ) : complaints.map(c => (
-                            <tr key={c._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>{c._id.substring(0, 6).toUpperCase()}</td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span style={{ display: 'block', fontWeight: '500' }}>{c.studentId?.firstName || 'Unknown'} {c.studentId?.lastName}</span>
-                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{c.studentId?.registrationNumber}</span>
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span style={{ background: 'rgba(255,255,255,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.85rem' }}>
-                                        {c.category}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '1rem', maxWidth: '300px' }}>{c.title}</td>
-                                <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                                    {new Date(c.createdAt).toLocaleDateString()}
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span className={`badge ${c.status === 'Open' ? 'open' : c.status === 'In Progress' ? 'warning' : 'resolved'}`}>
-                                        {c.status}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    <select
-                                        value={c.status}
-                                        onChange={e => updateStatus(c._id, e.target.value)}
-                                        style={{
-                                            padding: '0.4rem', borderRadius: '4px', background: 'rgba(0,0,0,0.5)',
-                                            color: 'white', border: '1px solid var(--glass-border)',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        <option value="Open">Set Open</option>
-                                        <option value="In Progress">Set In Progress</option>
-                                        <option value="Resolved">Set Resolved</option>
-                                        <option value="Rejected">Set Rejected</option>
-                                    </select>
-                                </td>
+            {/* Data Grid */}
+            <div className="bg-slate-900/60 border border-slate-800 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-sm">
+                <div className="overflow-x-auto custom-scrollbar min-h-[400px]">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-950/40 border-b border-slate-800">
+                                <th className="p-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Intel Ref</th>
+                                <th className="p-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Student Narrative</th>
+                                <th className="p-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Context</th>
+                                <th className="p-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Status Directive</th>
+                                <th className="p-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Operation</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/40">
+                            {filteredComplaints.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="p-32 text-center">
+                                        <MessageSquare className="w-16 h-16 text-slate-800 mx-auto mb-8 animate-pulse" />
+                                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">No matching anomalies detected in synchronization stream</p>
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredComplaints.map((c) => (
+                                    <tr key={c._id} className="group hover:bg-slate-800/20 transition-all duration-300">
+                                        <td className="p-8">
+                                            <div className="space-y-1">
+                                                <span className="text-[10px] font-black text-indigo-500 tracking-widest uppercase bg-indigo-500/5 px-2 py-1 rounded">#{c._id?.substring(0, 8).toUpperCase()}</span>
+                                                <div className="flex items-center gap-2 text-[9px] font-bold text-slate-600 uppercase tracking-widest mt-1">
+                                                    <Calendar size={10} /> {new Date(c.createdAt).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-8">
+                                            <div className="max-w-md space-y-2">
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border ${
+                                                        c.priority === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
+                                                        c.priority === 'medium' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                        'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                    }`}>
+                                                        {c.priority || 'Normal'}
+                                                    </span>
+                                                    <h3 className="text-sm font-black text-white tracking-tight group-hover:text-indigo-400 transition-colors">{c.title}</h3>
+                                                </div>
+                                                <p className="text-xs text-slate-500 font-medium leading-relaxed italic line-clamp-1 group-hover:line-clamp-none transition-all duration-500">"{c.description}"</p>
+                                            </div>
+                                        </td>
+                                        <td className="p-8">
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-3 text-slate-300">
+                                                    <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700 shadow-inner">
+                                                        <User size={14} className="text-slate-500" />
+                                                    </div>
+                                                    <span className="text-sm font-bold tracking-tight">{c.studentName || 'Unknown Student'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3 text-slate-500 pl-1">
+                                                    <Home size={12} />
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest">Room {c.roomNumber || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-8">
+                                            <div className="relative">
+                                                <select 
+                                                    value={c.status} 
+                                                    onChange={(e) => updateStatus(c._id, e.target.value)}
+                                                    className={`appearance-none w-full min-w-[140px] px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest border outline-none transition-all cursor-pointer shadow-xl ${getStatusStyles(c.status)}`}
+                                                >
+                                                    <option value="pending">Pending</option>
+                                                    <option value="in_progress">In Progress</option>
+                                                    <option value="resolved">Resolved</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+                                                    <ChevronRight size={14} className="rotate-90" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-8 text-right">
+                                            <button className="p-4 bg-slate-950 border border-slate-800 text-slate-500 hover:text-indigo-400 hover:border-indigo-500/50 rounded-2xl transition-all active:scale-95 group/btn">
+                                                <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            
+            {/* Footer Intel */}
+            <footer className="text-center">
+                <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em]">Proprietary Administrative Conflict Management System • v4.2.0-DARK</p>
+            </footer>
         </div>
     );
 };
+
+const FilterButton = ({ active, onClick, label }) => (
+    <button
+        onClick={onClick}
+        className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] transition-all ${
+            active 
+                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40' 
+                : 'text-slate-600 hover:text-slate-400'
+        }`}
+    >
+        {label}
+    </button>
+);
 
 export default ManageComplaints;

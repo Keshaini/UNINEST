@@ -9,10 +9,22 @@ import {
   Save,
   ShieldCheck,
   Trash2,
-  X
+  X,
+  Search,
+  Filter,
+  Loader2,
+  Sparkles,
+  ArrowRight,
+  Info,
+  Calendar,
+  AlertCircle,
+  Activity,
+  Users,
+  RefreshCw
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { createHostel, deleteHostel, fetchHostels, updateHostel } from '../services/hostelApi';
+import { toast } from 'react-toastify';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 
 const defaultForm = {
   roomNumber: '',
@@ -39,6 +51,13 @@ function AdminHostelManagementSystem() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Modal State
+  const [modal, setModal] = useState({
+      isOpen: false,
+      hostelId: null,
+      hostelName: ''
+  });
+
   const loadHostels = async () => {
     try {
       setIsLoading(true);
@@ -46,7 +65,8 @@ function AdminHostelManagementSystem() {
       const response = await fetchHostels();
       setHostels(response);
     } catch (error) {
-      setErrorMessage(error?.response?.data?.error || 'Failed to load hostels from backend.');
+      toast.error('Failed to synchronize global hostel registry.');
+      setErrorMessage(error?.response?.data?.error || 'Database synchronization failure.');
     } finally {
       setIsLoading(false);
     }
@@ -68,20 +88,15 @@ function AdminHostelManagementSystem() {
 
   const handleImageFileChange = (event) => {
     const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
+    if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setErrorMessage('Please upload a valid image file.');
-      return;
+        toast.warning('Invalid file architecture. Image required.');
+        return;
     }
-
     const reader = new FileReader();
-    reader.onload = () => {
-      updateField('imageUrl', typeof reader.result === 'string' ? reader.result : '');
-      setErrorMessage('');
+    reader.onloadend = () => {
+      updateField('imageUrl', reader.result);
+      toast.success('Visual asset synthesized successfully.');
     };
     reader.readAsDataURL(file);
   };
@@ -100,20 +115,19 @@ function AdminHostelManagementSystem() {
     if (!formData.maxResidentsPerRoom || Number(formData.maxResidentsPerRoom) <= 0) {
       return 'Max residents per room must be greater than 0.';
     }
-
     return '';
   };
 
   const handleSaveHostel = async () => {
     const validationError = validateForm();
-
     if (validationError) {
       setErrorMessage(validationError);
+      toast.error(validationError);
       return;
     }
 
     const hostelInput = {
-      roomNumber: formData.roomNumber.trim(),
+      roomNumber: formData.roomNumber.trim() || `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: formData.name.trim(),
       location: formData.location.trim(),
       image: formData.imageUrl.trim() || '/api/placeholder/400/250',
@@ -133,16 +147,17 @@ function AdminHostelManagementSystem() {
     try {
       setIsSaving(true);
       setErrorMessage('');
-
       if (editingId) {
         await updateHostel(editingId, hostelInput);
+        toast.success('Hostel parameters updated & broadcasted.');
       } else {
         await createHostel(hostelInput);
+        toast.success('New hostel entity synthesized successfully.');
       }
-
       await loadHostels();
       resetForm();
     } catch (error) {
+      toast.error('Entity synthesis failure detected.');
       setErrorMessage(error?.response?.data?.error || 'Failed to save hostel.');
     } finally {
       setIsSaving(false);
@@ -166,26 +181,26 @@ function AdminHostelManagementSystem() {
       mealPlanIncluded: Boolean(hostel.mealPlanIncluded),
       featuresText: (hostel.features || []).join(', ')
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const removeHostel = async (id) => {
-    const target = hostels.find((hostel) => hostel.id === id);
-    if (!target) return;
+  const confirmRemoval = (id, name) => {
+    setModal({ isOpen: true, hostelId: id, hostelName: name });
+  };
 
-    const approved = window.confirm(`Delete ${target.name}? This action cannot be undone.`);
-    if (!approved) return;
-
+  const handleRemoveHostel = async () => {
+    const id = modal.hostelId;
     try {
       setErrorMessage('');
       await deleteHostel(id);
+      toast.success(`${modal.hostelName} entity de-materialized successfully.`);
       await loadHostels();
     } catch (error) {
-      setErrorMessage(error?.response?.data?.error || 'Failed to delete hostel.');
-      return;
-    }
-
-    if (editingId === id) {
-      resetForm();
+      toast.error('Manifest deletion failure.');
+      setErrorMessage(error?.response?.data?.error || 'Deletion failed.');
+    } finally {
+      setModal({ isOpen: false, hostelId: null, hostelName: '' });
+      if (editingId === id) resetForm();
     }
   };
 
@@ -195,9 +210,7 @@ function AdminHostelManagementSystem() {
         keyword.trim().length === 0 ||
         hostel.name.toLowerCase().includes(keyword.trim().toLowerCase()) ||
         hostel.location.toLowerCase().includes(keyword.trim().toLowerCase());
-
       const matchesStatus = statusFilter === 'All' || (hostel.status || 'Open') === statusFilter;
-
       return matchesKeyword && matchesStatus;
     });
   }, [hostels, keyword, statusFilter]);
@@ -206,343 +219,285 @@ function AdminHostelManagementSystem() {
   const fullCount = hostels.filter((hostel) => hostel.status === 'Full').length;
   const totalBeds = hostels.reduce((sum, hostel) => sum + (hostel.bedsAvailable || 0), 0);
 
+  const inputClass = "w-full rounded-2xl bg-slate-950/40 border border-slate-800 px-5 py-3.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all placeholder:text-slate-600 font-bold";
+  const selectClass = "w-full rounded-2xl bg-slate-950/40 border border-slate-800 px-5 py-3.5 text-sm text-white focus:border-emerald-500/50 outline-none transition-all cursor-pointer font-bold [&>option]:bg-slate-900";
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-100 via-cyan-50 to-amber-50 text-slate-700">
-      <div className="absolute -top-24 -left-12 h-64 w-64 rounded-full bg-cyan-300/30 blur-3xl" />
-      <div className="absolute top-24 -right-20 h-72 w-72 rounded-full bg-amber-300/30 blur-3xl" />
-
-      <div className="relative max-w-7xl mx-auto px-4 py-8 md:px-8">
-        <header className="mb-6 rounded-3xl bg-white/85 backdrop-blur border border-white shadow-lg p-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="min-h-screen bg-[#0B1120] text-slate-300 p-6 lg:p-10 animate-fade-in selection:bg-emerald-500/30">
+      
+      <div className="max-w-[1600px] mx-auto space-y-10">
+        
+        {/* Header section */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl backdrop-blur-md">
             <div>
-              <p className="text-xs uppercase tracking-widest text-cyan-700 font-bold">UNINEST Admin Portal</p>
-              <h1 className="text-3xl md:text-4xl font-black text-slate-800">Hostel Management System</h1>
-              <p className="text-sm text-slate-500 mt-1">Create, update, and monitor hostels from one dashboard.</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500 mb-2">Central Management Module</p>
+                <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+                    <Building2 className="text-emerald-500 w-10 h-10" />
+                    Hostel Architecture
+                </h1>
+                <p className="text-slate-500 font-medium mt-3 tracking-wide">Synthesize, update, and regulate institutional housing entities.</p>
             </div>
-
-            <Link
-              to="/hostels"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold"
-            >
-              Back to User View
-            </Link>
-          </div>
+            <div className="flex gap-4">
+                <div className="bg-slate-950/50 px-6 py-4 rounded-2xl border border-slate-800 flex flex-col items-center">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Global Index</span>
+                    <span className="text-2xl font-black text-white mt-1">{hostels.length}</span>
+                </div>
+            </div>
         </header>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="rounded-2xl bg-white/90 border border-white shadow-md p-4">
-            <p className="text-xs uppercase text-slate-400 font-bold">Total Hostels</p>
-            <p className="text-2xl font-black text-slate-800 mt-1">{hostels.length}</p>
-          </div>
-          <div className="rounded-2xl bg-white/90 border border-white shadow-md p-4">
-            <p className="text-xs uppercase text-slate-400 font-bold">Open / Full</p>
-            <p className="text-2xl font-black text-slate-800 mt-1">{openCount} / {fullCount}</p>
-          </div>
-          <div className="rounded-2xl bg-white/90 border border-white shadow-md p-4">
-            <p className="text-xs uppercase text-slate-400 font-bold">Total Beds Available</p>
-            <p className="text-2xl font-black text-slate-800 mt-1">{totalBeds}</p>
-          </div>
-        </section>
+        {/* Analytics Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <MetricCard title="Operational Assets" value={openCount} sub="Open Status" icon={Building2} color="emerald" />
+            <MetricCard title="Full Occupancy" value={fullCount} sub="Maximum Capacity" icon={ShieldCheck} color="rose" />
+            <MetricCard title="Global Bed Pool" value={totalBeds} sub="Total Available" icon={BedDouble} color="amber" />
+        </div>
 
-        <section className="grid grid-cols-1 xl:grid-cols-[380px_minmax(0,1fr)] gap-6">
-          <div className="rounded-3xl bg-white/90 border border-white shadow-lg p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Building2 size={18} className="text-cyan-700" />
-              <h2 className="font-bold text-lg text-slate-800">{editingId ? 'Edit Hostel' : 'Create Hostel'}</h2>
-            </div>
+        <div className="grid grid-cols-1 xl:grid-cols-[450px_minmax(0,1fr)] gap-8 lg:gap-12">
+            
+            {/* Editor Block */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-3xl h-fit sticky top-10 overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-colors"></div>
+                
+                <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-4 mb-10 pb-6 border-b border-slate-800">
+                    <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                        {editingId ? <Pencil size={20} className="text-emerald-400" /> : <Plus size={20} className="text-emerald-400" />}
+                    </div>
+                    {editingId ? 'Edit Profile' : 'Synthesize Entity'}
+                </h3>
 
-            <div className="space-y-3">
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Room Number / Code</span>
-                <input
-                  type="text"
-                  value={formData.roomNumber}
-                  onChange={(e) => updateField('roomNumber', e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
+                <div className="space-y-6 relative z-10">
+                    <Field label="Unique Identifier" icon={Info}>
+                        <input type="text" value={formData.roomNumber} onChange={(e) => updateField('roomNumber', e.target.value)} className={inputClass} placeholder="e.g. ALPHA-01" />
+                    </Field>
 
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Hostel Name</span>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => updateField('name', e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
+                    <Field label="Entity Name" icon={Building2}>
+                        <input type="text" value={formData.name} onChange={(e) => updateField('name', e.target.value)} className={inputClass} placeholder="Uninest Grand Suite" />
+                    </Field>
 
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Location</span>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => updateField('location', e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
+                    <Field label="Temporal Location" icon={MapPin}>
+                        <input type="text" value={formData.location} onChange={(e) => updateField('location', e.target.value)} className={inputClass} placeholder="Main Campus Zone" />
+                    </Field>
 
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Hostel Image URL</span>
-                <input
-                  type="text"
-                  value={formData.imageUrl}
-                  onChange={(e) => updateField('imageUrl', e.target.value)}
-                  placeholder="https://example.com/hostel.jpg"
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Or Upload Hostel Image</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageFileChange}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-100 file:px-3 file:py-1.5 file:text-cyan-800 file:font-semibold"
-                />
-              </label>
-
-              {formData.imageUrl && (
-                <div className="rounded-2xl border border-slate-200 p-3 bg-slate-50">
-                  <p className="text-xs font-semibold text-slate-500 mb-2">Image Preview</p>
-                  <img
-                    src={formData.imageUrl}
-                    alt="Hostel preview"
-                    className="w-full h-36 object-cover rounded-xl"
-                    onError={() => setErrorMessage('Image URL could not be loaded. Please check the link.')}
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block text-sm">
-                  <span className="block text-slate-500 mb-1">Monthly Rent</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.price}
-                    onChange={(e) => updateField('price', e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                  />
-                </label>
-
-                <label className="block text-sm">
-                  <span className="block text-slate-500 mb-1">Beds</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.bedsAvailable}
-                    onChange={(e) => updateField('bedsAvailable', e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                  />
-                </label>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block text-sm">
-                  <span className="block text-slate-500 mb-1">Status</span>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => updateField('status', e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                  >
-                    <option value="Open">Open</option>
-                    <option value="Limited">Limited</option>
-                    <option value="Full">Full</option>
-                  </select>
-                </label>
-
-                <label className="block text-sm">
-                  <span className="block text-slate-500 mb-1">Hostel Type</span>
-                  <select
-                    value={formData.hostelType}
-                    onChange={(e) => updateField('hostelType', e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                  >
-                    <option value="Boys Hostel">Boys Hostel</option>
-                    <option value="Girls Hostel">Girls Hostel</option>
-                    <option value="Mixed Hostel">Mixed Hostel</option>
-                  </select>
-                </label>
-              </div>
-
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Max Residents / Room</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={formData.maxResidentsPerRoom}
-                  onChange={(e) => updateField('maxResidentsPerRoom', e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-
-              <label className="block text-sm">
-                <span className="block text-slate-500 mb-1">Features (comma-separated)</span>
-                <textarea
-                  rows={3}
-                  value={formData.featuresText}
-                  onChange={(e) => updateField('featuresText', e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2"
-                />
-              </label>
-
-              <div className="grid grid-cols-2 gap-3 pt-1">
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={formData.nearUniversity}
-                    onChange={(e) => updateField('nearUniversity', e.target.checked)}
-                    className="h-4 w-4"
-                  />
-                  Near University
-                </label>
-
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={formData.mealPlanIncluded}
-                    onChange={(e) => updateField('mealPlanIncluded', e.target.checked)}
-                    className="h-4 w-4"
-                  />
-                  Meal Plan Included
-                </label>
-              </div>
-
-              {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
-
-              <div className="flex items-center gap-2 pt-2">
-                <button
-                  onClick={handleSaveHostel}
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-white font-semibold hover:bg-cyan-700"
-                >
-                  {editingId ? <Save size={16} /> : <Plus size={16} />}
-                  {isSaving ? 'Saving...' : editingId ? 'Update Hostel' : 'Create Hostel'}
-                </button>
-
-                {editingId && (
-                  <button
-                    onClick={resetForm}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 font-semibold hover:bg-slate-100"
-                  >
-                    <X size={16} />
-                    Cancel
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white/90 border border-white shadow-lg p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={18} className="text-cyan-700" />
-                <h2 className="font-bold text-lg text-slate-800">Hostel Inventory</h2>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search hostel or location"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                >
-                  <option value="All">All Status</option>
-                  <option value="Open">Open</option>
-                  <option value="Limited">Limited</option>
-                  <option value="Full">Full</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {isLoading && (
-                <div className="rounded-2xl border border-slate-200 p-6 text-center text-slate-500">
-                  Loading hostels from backend...
-                </div>
-              )}
-
-              {filteredHostels.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
-                  No hostels match your filters.
-                </div>
-              )}
-
-              {!isLoading && filteredHostels.map((hostel) => (
-                <article key={hostel.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <div className="flex flex-wrap justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={hostel.image || '/api/placeholder/400/250'}
-                        alt={hostel.name}
-                        className="h-12 w-12 rounded-lg object-cover border border-slate-200"
-                      />
-                      <div>
-                      <h3 className="font-bold text-slate-800">{hostel.name}</h3>
-                      <p className="text-sm text-slate-500 inline-flex items-center gap-1">
-                        <MapPin size={14} />
-                        {hostel.location}
-                      </p>
-                      </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Visual Asset</label>
+                        <label className="group relative flex flex-col items-center justify-center w-full h-48 rounded-[2rem] border-2 border-dashed border-slate-700/50 hover:border-emerald-500/40 bg-slate-950/30 hover:bg-slate-950/50 overflow-hidden transition-all cursor-pointer">
+                            {formData.imageUrl ? (
+                                <>
+                                    <img src={formData.imageUrl} className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity" alt="Preview" />
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                                        <RefreshCw size={24} className="text-white animate-spin-slow" />
+                                        <span className="text-[10px] font-black text-white uppercase tracking-widest">Update Binary</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center p-6">
+                                    <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-800">
+                                        <Plus className="text-slate-600" size={24} />
+                                    </div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Upload 400x250 Raster</p>
+                                </div>
+                            )}
+                            <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+                        </label>
                     </div>
 
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                        hostel.status === 'Full'
-                          ? 'bg-rose-100 text-rose-700'
-                          : hostel.status === 'Limited'
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-emerald-100 text-emerald-700'
-                      }`}
-                    >
-                      {hostel.status || 'Open'}
-                    </span>
-                  </div>
+                    <div className="grid grid-cols-2 gap-6">
+                        <Field label="Monthly Premium" icon={CircleDollarSign}>
+                            <input type="number" value={formData.price} onChange={(e) => updateField('price', e.target.value)} className={inputClass} />
+                        </Field>
+                        <Field label="Bed Matrix" icon={BedDouble}>
+                            <input type="number" value={formData.bedsAvailable} onChange={(e) => updateField('bedsAvailable', e.target.value)} className={inputClass} />
+                        </Field>
+                    </div>
 
-                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-slate-600">
-                    <p className="inline-flex items-center gap-1">
-                      <CircleDollarSign size={14} />
-                      LKR {hostel.price.toLocaleString()}
-                    </p>
-                    <p className="inline-flex items-center gap-1">
-                      <BedDouble size={14} />
-                      Beds: {hostel.bedsAvailable}
-                    </p>
-                    <p>Type: {hostel.hostelType || 'N/A'}</p>
-                  </div>
+                    <div className="grid grid-cols-2 gap-6">
+                        <Field label="Status Logic" icon={Activity}>
+                            <select value={formData.status} onChange={(e) => updateField('status', e.target.value)} className={selectClass}>
+                                <option value="Open">Open</option>
+                                <option value="Limited">Limited</option>
+                                <option value="Full">Full</option>
+                            </select>
+                        </Field>
+                        <Field label="Target Demographic" icon={Users}>
+                            <select value={formData.hostelType} onChange={(e) => updateField('hostelType', e.target.value)} className={selectClass}>
+                                <option value="Boys Hostel">Boys Hostel</option>
+                                <option value="Girls Hostel">Girls Hostel</option>
+                                <option value="Mixed Hostel">Mixed Hostel</option>
+                            </select>
+                        </Field>
+                    </div>
 
-                  <div className="mt-4 flex items-center gap-2">
-                    <button
-                      onClick={() => startEdit(hostel)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-semibold hover:bg-slate-100"
-                    >
-                      <Pencil size={14} />
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => removeHostel(hostel.id)}
-                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 text-rose-700 px-3 py-1.5 text-sm font-semibold hover:bg-rose-50"
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </button>
-                  </div>
-                </article>
-              ))}
+                    <Field label="Features (Comma Array)" icon={Sparkles}>
+                        <textarea rows={3} value={formData.featuresText} onChange={(e) => updateField('featuresText', e.target.value)} className={`${inputClass} resize-none`} placeholder="WiFi, A/C, Bio-metric..." />
+                    </Field>
+
+                    <div className="flex gap-4 pt-6 border-t border-slate-800">
+                        <button
+                            onClick={handleSaveHostel}
+                            disabled={isSaving}
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-500 px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : editingId ? <Save size={16} /> : <Plus size={16} />}
+                            {editingId ? 'Push Updates' : 'Commit Entity'}
+                        </button>
+                        {editingId && (
+                            <button
+                                onClick={resetForm}
+                                className="bg-slate-950 border border-slate-800 px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-white transition-all active:scale-95"
+                            >
+                                <X size={16} />
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
-          </div>
-        </section>
+
+            {/* Inventory Registry */}
+            <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-4 lg:p-10 shadow-3xl flex flex-col h-[calc(100vh-140px)] sticky top-10">
+                <div className="flex flex-wrap items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-800 shrink-0">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                            <ShieldCheck className="text-indigo-400" size={20} />
+                        </div>
+                        <h3 className="text-xl font-black text-white tracking-tight uppercase">Registry Node</h3>
+                    </div>
+
+                    <div className="flex gap-3 w-full md:w-auto">
+                        <div className="relative group flex-1 md:w-64">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                            <input type="text" placeholder="Search architecture..." value={keyword} onChange={(e) => setKeyword(e.target.value)} className="w-full bg-slate-950/40 border border-slate-800 rounded-2xl pl-14 pr-5 py-3 text-[10px] font-black text-white uppercase tracking-widest outline-none focus:border-emerald-500/50" />
+                        </div>
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-slate-950/40 border border-slate-800 rounded-2xl px-5 py-3 text-[10px] font-black text-white uppercase tracking-widest outline-none cursor-pointer">
+                            <option value="All">All Nodes</option>
+                            <option value="Open">Status: Open</option>
+                            <option value="Limited">Status: Ltd</option>
+                            <option value="Full">Status: Full</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-4 space-y-6 custom-scrollbar pb-10">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-24 bg-slate-950/20 rounded-[2rem] border border-dashed border-slate-800">
+                            <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
+                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Synchronizing Master Registry</p>
+                        </div>
+                    ) : filteredHostels.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-24 bg-slate-950/20 rounded-[2rem] border border-dashed border-slate-800 text-center px-10">
+                            <Search className="w-12 h-12 text-slate-800 mb-4" />
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Query returned zero valid sectors.</p>
+                        </div>
+                    ) : filteredHostels.map((hostel) => (
+                        <article key={hostel.id} className="group bg-slate-950/40 border border-slate-800/80 rounded-[2.5rem] p-6 lg:p-10 hover:border-slate-700 transition-all shadow-xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors"></div>
+                            
+                            <div className="flex flex-col md:flex-row gap-8 lg:gap-12 relative z-10">
+                                <div className="w-full md:w-48 xl:w-56 h-48 lg:h-56 rounded-[2rem] overflow-hidden border border-slate-800 flex-shrink-0">
+                                    <img src={hostel.image || '/api/placeholder/400/250'} className="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt={hostel.name} />
+                                </div>
+
+                                <div className="flex-1 flex flex-col justify-between py-2">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <h4 className="text-2xl font-black text-white uppercase tracking-tight group-hover:text-emerald-400 transition-colors leading-none">{hostel.name}</h4>
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-3 flex items-center gap-2">
+                                                    <MapPin size={12} className="text-emerald-500" /> {hostel.location}
+                                                </p>
+                                            </div>
+                                            <StatusBadge status={hostel.status} />
+                                        </div>
+
+                                        <div className="flex flex-wrap gap-4 pt-2">
+                                            <InfoMetric label="Lease" value={`LKR ${hostel.price.toLocaleString()}`} icon={CircleDollarSign} />
+                                            <InfoMetric label="Pool" value={`${hostel.bedsAvailable} Units`} icon={BedDouble} />
+                                            <InfoMetric label="Class" value={hostel.hostelType} icon={Users} />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-end gap-3 pt-8 mt-8 border-t border-slate-800">
+                                        <button onClick={() => startEdit(hostel)} className="flex-1 lg:flex-none flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 px-6 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all active:scale-95">
+                                            <Pencil size={14} className="text-emerald-500" />
+                                            Calibrate
+                                        </button>
+                                        <button onClick={() => confirmRemoval(hostel.id, hostel.name)} className="flex items-center justify-center p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white transition-all active:scale-95">
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+            </div>
+        </div>
       </div>
+
+      <ConfirmationModal 
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ isOpen: false, hostelId: null, hostelName: '' })}
+        onConfirm={handleRemoveHostel}
+        title="Terminal Deletion Process"
+        message={`Are you certain you wish to de-materialize the ${modal.hostelName} entity? Access to associated data will be permanently revoked across the network.`}
+        type="danger"
+      />
     </div>
   );
 }
+
+// ====== SUBCOMPONENTS ======
+
+const MetricCard = ({ title, value, sub, icon: Icon, color }) => {
+    const colors = {
+        emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+        rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+        amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+    };
+    return (
+        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+            <div className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full blur-3xl -translate-y-16 translate-x-16 bg-current ${colors[color].split(' ')[0]}`}></div>
+            <div className="flex items-center justify-between relative z-10">
+                <div>
+                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-1.5 leading-none">{title}</p>
+                    <h4 className="text-4xl font-black text-white tracking-tighter mb-1 leading-none">{value}</h4>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">{sub}</p>
+                </div>
+                <div className={`p-4 rounded-2xl shadow-inner ${colors[color]}`}>
+                    <Icon size={24} />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Field = ({ label, icon: Icon, children }) => (
+    <div className="space-y-3">
+        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+            <Icon size={12} className="text-slate-600" /> {label}
+        </label>
+        {children}
+    </div>
+);
+
+const InfoMetric = ({ label, value, icon: Icon }) => (
+    <div className="flex items-center gap-3 bg-slate-950/50 px-4 py-2.5 rounded-xl border border-slate-800/80 group-hover:border-slate-700 transition-colors">
+        <Icon size={13} className="text-slate-600 group-hover:text-emerald-500 transition-colors" />
+        <div className="flex flex-col leading-none">
+            <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter mb-1">{label}</span>
+            <span className="text-xs font-black text-slate-200">{value}</span>
+        </div>
+    </div>
+);
+
+const StatusBadge = ({ status }) => {
+    const s = status || 'Open';
+    const style = s === 'Full' 
+        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' 
+        : s === 'Limited' 
+            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+
+    return <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border ${style}`}>{s}</span>;
+};
 
 export default AdminHostelManagementSystem;

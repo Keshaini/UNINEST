@@ -50,7 +50,7 @@ function Login() {
                     
                     <div className="relative z-10">
                         <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 shadow-lg text-white font-bold text-xl mb-6">
-                            S
+                            UNINEST STUDENT PORTAL
                         </div>
                         <h2 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 leading-tight mb-4">
                             Welcome back.
