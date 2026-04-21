@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rooms</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="rooms">
+    <main class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-chip">UNINEST</span>
+          <div>
+            <h1>Room Inventory</h1>
+            <p>Track room status, occupancy, and available beds.</p>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-link" data-page="dashboard" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-page="rooms" href="rooms.html">Rooms</a>
+          <a class="nav-link" data-page="students" href="students.html">Students</a>
+          <a class="nav-link" data-page="allocate" href="allocate.html">Allocate</a>
+          <a class="nav-link" data-page="reports" href="reports.html">Reports</a>
+        </nav>
+      </header>
+
+      <section class="grid cards">
+        <article class="card">
+          <h3>Block A - Room A102</h3>
+          <p>2/3 beds occupied</p>
+          <span class="badge ok">1 bed available</span>
+        </article>
+        <article class="card">
+          <h3>Block B - Room B208</h3>
+          <p>4/4 beds occupied</p>
+          <span class="badge danger">Full</span>
+        </article>
+        <article class="card">
+          <h3>Block C - Room C116</h3>
+          <p>1/3 beds occupied</p>
+          <span class="badge ok">2 beds available</span>
+        </article>
+        <article class="card">
+          <h3>Block D - Room D312</h3>
+          <p>3/3 beds occupied</p>
+          <span class="badge warn">Maintenance due</span>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top: 14px">
+        <h2>Room Register</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Block</th>
+                <th>Capacity</th>
+                <th>Occupied</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A102</td><td>A</td><td>3</td><td>2</td><td><span class="badge ok">Available</span></td></tr>
+              <tr><td>B208</td><td>B</td><td>4</td><td>4</td><td><span class="badge danger">Full</span></td></tr>
+              <tr><td>C116</td><td>C</td><td>3</td><td>1</td><td><span class="badge ok">Available</span></td></tr>
+              <tr><td>D312</td><td>D</td><td>3</td><td>3</td><td><span class="badge warn">Review</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
