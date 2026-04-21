@@ -2,10 +2,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 function AdminRoute({ children }) {
   const location = useLocation();
-  const isAdminAuthenticated = sessionStorage.getItem('uninest_admin_auth') === 'true';
+  const isAdminAuthenticated = localStorage.getItem('adminToken') !== null
 
   if (!isAdminAuthenticated) {
-    return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/admin-login" replace state={{ from: location.pathname }} />;
   }
 
   return children;

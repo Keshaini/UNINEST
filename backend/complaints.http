@@ -1,0 +1,65 @@
+@baseUrl = http://localhost:5000/api/complaints
+
+### Create complaint (student)
+POST {{baseUrl}}/student/submit
+Content-Type: application/json
+
+{
+  "studentId": "STU-001",
+  "studentName": "Nimal Perera",
+  "roomNumber": "A-102",
+  "title": "Water leakage in bathroom",
+  "description": "There is continuous water leakage near the sink.",
+  "category": "maintenance",
+  "priority": "high"
+}
+
+### List all complaints (support)
+GET {{baseUrl}}/support/all?page=1&limit=10&status=pending
+
+### Complaint statistics (support dashboard)
+GET {{baseUrl}}/support/overview-stats
+
+### Student complaint history
+GET {{baseUrl}}/student/history/STU-001
+
+### Get complaint by ID
+GET {{baseUrl}}/record/{{complaintId}}
+
+### Update complaint (support)
+PATCH {{baseUrl}}/support/update/{{complaintId}}
+Content-Type: application/json
+
+{
+  "status": "in_progress",
+  "assignedTo": "Support Team A",
+  "supportNotes": "Technician assigned for inspection.",
+  "priority": "high"
+}
+
+### Resolve complaint (support)
+PATCH {{baseUrl}}/support/update/{{complaintId}}
+Content-Type: application/json
+
+{
+  "status": "resolved",
+  "supportNotes": "Leakage fixed and tested."
+}
+
+### Delete complaint
+DELETE {{baseUrl}}/support/remove/{{complaintId}}
+
+### Student full ticket view
+GET {{baseUrl}}/student/ticket/{{complaintId}}/full-view/STU-001
+
+### Student ticket chat messages
+GET {{baseUrl}}/student/ticket/{{complaintId}}/messages/STU-001
+
+### Student send chat message
+POST {{baseUrl}}/student/ticket/{{complaintId}}/messages/STU-001/send
+Content-Type: application/json
+
+{
+  "senderName": "Nimal Perera",
+  "message": "Any update about my complaint?"
+}

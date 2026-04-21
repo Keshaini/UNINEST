@@ -1,42 +1,16 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { Menu, Home, Users, Search, AlertCircle, Bell, LogOut, X, User } from 'lucide-react';
+import logo from './assets/logo.png';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import HostelManagementSystem from './pages/HostelManagementSystem';
 import HostelBookingPage from './pages/HostelBookingPage';
 import AdminHostelManagementSystem from './pages/AdminHostelManagementSystem';
 import RoomChangeRequestPage from './pages/RoomChangeRequestPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminRoute from './components/AdminRoute';
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/hostels" replace />} />
-        <Route path="/hostels" element={<HostelManagementSystem />} />
-        <Route path="/booking/:hostelId" element={<HostelBookingPage />} />
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route
-          path="/admin/hostels"
-          element={
-            <AdminRoute>
-              <AdminHostelManagementSystem />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/room-change-requests"
-          element={
-            <AdminRoute>
-              <RoomChangeRequestPage />
-            </AdminRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
-  );
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Menu, Home, Users, Search, DollarSign, AlertCircle, Bell, LogOut, X, User } from 'lucide-react';
-import logo from './assets/logo.png';
 
 // Import Pages
 import HomePage from './pages/Home';
@@ -47,10 +21,17 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminRegister from './pages/AdminRegister';
 import RoomBooking from './pages/RoomBooking';
-import Complaints from './pages/Complaints';
-import Payments from './pages/Payments';
 import Notices from './pages/Notices';
 import StudentProfile from './pages/StudentProfile';
+import StudentComplaintModulePage from './pages/StudentComplaintModulePage';
+
+// Import Invoice & Payment Pages
+import InvoiceCreate from './pages/admin/InvoiceCreate';
+import InvoiceList from './pages/admin/InvoiceList';
+import PaymentForm from './pages/PaymentForm';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentHistory from './pages/PaymentHistory';
+import StudentInvoices from './pages/StudentInvoices';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
     const userStr = allowedRole === 'Admin' ? localStorage.getItem('adminUser') : localStorage.getItem('user');
@@ -82,7 +63,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     const location = useLocation();
     
     // Hide sidebar on auth pages and admin pages
-    const isHidden = ['/', '/login', '/signup', '/admin-login', '/admin-register'].includes(location.pathname) || location.pathname.startsWith('/admin');
+    const isHidden = ['/', '/login', '/signup', '/admin-login', '/admin-register', '/hostels'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/booking') || location.pathname.startsWith('/room-change-requests') || location.pathname.startsWith('/payment-form') || location.pathname.startsWith('/payment-success');
     
     if (isHidden) return null;
 
@@ -93,9 +74,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     <button className="mobile-nav-toggle absolute right-4 top-4" onClick={() => setIsOpen(false)} style={{ display: isOpen ? 'block' : 'none', position: 'absolute', padding: 0 }}>
                         <X size={24} className="text-slate-400" />
                     </button>
-                    <img src={logo} alt="HostelPro Logo" className="h-16 w-auto max-w-full object-contain mb-3 drop-shadow-[0_4px_12px_rgba(99,102,241,0.3)] transition-transform duration-300 group-hover:scale-105 mx-auto" />
+                    <img src={logo} alt="UNINEST Logo" className="h-16 w-auto max-w-full object-contain mb-3 drop-shadow-[0_4px_12px_rgba(99,102,241,0.3)] transition-transform duration-300 group-hover:scale-105 mx-auto" />
                     <h2 className="text-xl font-extrabold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent tracking-wide text-center">
-                        HostelPro
+                        UNINEST
                     </h2>
                     <p className="text-xs text-slate-400 font-medium tracking-wide mt-1 text-center">Management System</p>
                 </div>
@@ -112,10 +93,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                     <Link to="/rooms" onClick={() => setIsOpen(false)} className={`nav-link ${location.pathname === '/rooms' ? 'active' : ''}`} style={navStyle(location.pathname === '/rooms')}>
                         <Search size={20} /> Room Bookings
                     </Link>
-                    <Link to="/payments" onClick={() => setIsOpen(false)} className={`nav-link ${location.pathname === '/payments' ? 'active' : ''}`} style={navStyle(location.pathname === '/payments')}>
-                        <DollarSign size={20} /> Transactions
-                    </Link>
-                    <Link to="/complaints" onClick={() => setIsOpen(false)} className={`nav-link ${location.pathname === '/complaints' ? 'active' : ''}`} style={navStyle(location.pathname === '/complaints')}>
+                    <Link to="/complaints/student" onClick={() => setIsOpen(false)} className={`nav-link ${location.pathname.startsWith('/complaints') ? 'active' : ''}`} style={navStyle(location.pathname.startsWith('/complaints'))}>
                         <AlertCircle size={20} /> Complaints Center
                     </Link>
                     <Link to="/notices" onClick={() => setIsOpen(false)} className={`nav-link ${location.pathname === '/notices' ? 'active' : ''}`} style={navStyle(location.pathname === '/notices')}>
@@ -159,7 +137,7 @@ const LayoutWatcher = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     
-    const isHidden = ['/', '/login', '/signup', '/admin-login', '/admin-register'].includes(location.pathname) || location.pathname.startsWith('/admin');
+    const isHidden = ['/', '/login', '/signup', '/admin-login', '/admin-register', '/hostels'].includes(location.pathname) || location.pathname.startsWith('/admin') || location.pathname.startsWith('/booking') || location.pathname.startsWith('/room-change-requests') || location.pathname.startsWith('/payment-form') || location.pathname.startsWith('/payment-success');
 
     return (
         <div className={isHidden ? "" : "app-layout"}>
@@ -185,8 +163,17 @@ const LayoutWatcher = ({ children }) => {
 function App() {
     return (
         <Router>
+            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} theme="colored" />
             <LayoutWatcher>
                 <Routes>
+                    {/* Legacy / Shared Routes */}
+                    {/* <Route path="/" element={<Navigate to="/hostels" replace />} /> */}
+                    <Route path="/hostels" element={<HostelManagementSystem />} />
+                    <Route path="/booking/:hostelId" element={<HostelBookingPage />} />
+                    <Route path="/admin/login" element={<AdminLoginPage />} />
+                    <Route path="/admin/hostels" element={<AdminRoute><AdminHostelManagementSystem /></AdminRoute>} />
+                    <Route path="/admin/room-change-requests" element={<AdminRoute><RoomChangeRequestPage /></AdminRoute>} />
+
                     {/* Public Auth Routes */}
                     <Route path="/" element={<div style={{ width: '100vw' }}><HomePage /></div>} />
                     <Route path="/login" element={<div style={{ width: '100vw' }}><Login /></div>} />
@@ -198,6 +185,18 @@ function App() {
                     <Route path="/admin" element={
                         <ProtectedRoute allowedRole="Admin">
                             <AdminDashboard />
+                        </ProtectedRoute>
+                    } />
+
+                    {/* Admin Invoice Routes */}
+                    <Route path="/admin/invoice" element={
+                        <ProtectedRoute allowedRole="Admin">
+                            <InvoiceList />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/admin/invoice/create" element={
+                        <ProtectedRoute allowedRole="Admin">
+                            <InvoiceCreate />
                         </ProtectedRoute>
                     } />
 
@@ -214,22 +213,49 @@ function App() {
                     } />
                     <Route path="/rooms" element={
                         <ProtectedRoute allowedRole="Student">
-                            <RoomBooking />
+                            <HostelManagementSystem />
                         </ProtectedRoute>
                     } />
-                    <Route path="/payments" element={
+                    <Route path="/booking/:hostelId" element={
                         <ProtectedRoute allowedRole="Student">
-                            <Payments />
+                            <HostelBookingPage />
                         </ProtectedRoute>
                     } />
-                    <Route path="/complaints" element={
+                    <Route path="/room-change-requests" element={
                         <ProtectedRoute allowedRole="Student">
-                            <Complaints />
+                            <RoomChangeRequestPage />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/complaints/*" element={
+                        <ProtectedRoute allowedRole="Student">
+                            <StudentComplaintModulePage />
                         </ProtectedRoute>
                     } />
                     <Route path="/notices" element={
                         <ProtectedRoute allowedRole="Student">
                             <Notices />
+                        </ProtectedRoute>
+                    } />
+
+                    {/* Student Invoice & Payment Routes */}
+                    <Route path="/invoices" element={
+                        <ProtectedRoute allowedRole="Student">
+                            <StudentInvoices />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/payment-form/:invoiceId" element={
+                        <ProtectedRoute allowedRole="Student">
+                            <PaymentForm />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/payment-success" element={
+                        <ProtectedRoute allowedRole="Student">
+                            <PaymentSuccess />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/payment-history" element={
+                        <ProtectedRoute allowedRole="Student">
+                            <PaymentHistory />
                         </ProtectedRoute>
                     } />
                 </Routes>

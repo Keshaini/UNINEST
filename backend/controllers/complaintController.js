@@ -1,52 +1,27 @@
-const Complaint = require('../models/Complaint');
+const createComplaint = require('./complaints/createComplaint');
+const listComplaints = require('./complaints/listComplaints');
+const getComplaintById = require('./complaints/getComplaintById');
+const getComplaintsByStudent = require('./complaints/getComplaintsByStudent');
+const updateComplaint = require('./complaints/updateComplaint');
+const deleteComplaint = require('./complaints/deleteComplaint');
+const getStudentTicketDetails = require('./complaints/getStudentTicketDetails');
+const getStudentTicketMessages = require('./complaints/getStudentTicketMessages');
+const sendStudentTicketMessage = require('./complaints/sendStudentTicketMessage');
+const getSupportTicketDetails = require('./complaints/getSupportTicketDetails');
+const getSupportTicketMessages = require('./complaints/getSupportTicketMessages');
+const getComplaintStats = require('./complaints/getComplaintStats');
 
-exports.submitComplaint = async (req, res) => {
-    try {
-        if (req.user.role !== 'Student') {
-            return res.status(403).json({ msg: 'Only students can submit complaints' });
-        }
-
-        const { category, title, description } = req.body;
-        const complaint = new Complaint({
-            studentId: req.user.profileId, // ID from valid token
-            category,
-            title,
-            description
-        });
-
-        await complaint.save();
-        res.status(201).json(complaint);
-    } catch (err) {
-        res.status(500).json({ msg: 'Server Error: ' + err.message });
-    }
-};
-
-exports.getComplaints = async (req, res) => {
-    try {
-        let filter = {};
-        if (req.user.role === 'Student') {
-            filter.studentId = req.user.profileId;
-        }
-        const complaints = await Complaint.find(filter).populate('studentId');
-        res.json(complaints);
-    } catch (err) {
-        res.status(500).json({ msg: 'Server Error: ' + err.message });
-    }
-};
-
-exports.updateComplaintStatus = async (req, res) => {
-    try {
-        const { status, adminResponse } = req.body;
-        const complaint = await Complaint.findById(req.params.id);
-        if (!complaint) return res.status(404).json({ msg: 'Complaint not found' });
-
-        complaint.status = status;
-        if (adminResponse) complaint.adminResponse = adminResponse;
-        if (status === 'Resolved') complaint.resolvedAt = Date.now();
-
-        await complaint.save();
-        res.json(complaint);
-    } catch (err) {
-        res.status(500).json({ msg: 'Server Error: ' + err.message });
-    }
+module.exports = {
+  createComplaint,
+  getAllComplaints: listComplaints,
+  getComplaintById,
+  getComplaintsByStudent,
+  updateComplaint,
+  deleteComplaint,
+  getStudentTicketDetails,
+  getStudentTicketMessages,
+  sendStudentTicketMessage,
+  getSupportTicketDetails,
+  getSupportTicketMessages,
+  getComplaintStats,
 };

@@ -1,0 +1,333 @@
+.student-tickets-shell .ticket-summary {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.student-tickets-shell .tickets-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.student-tickets-shell .tickets-header-copy {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.student-tickets-shell .tickets-header-copy p {
+  margin: 0;
+}
+
+.student-tickets-shell .back-btn {
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--ink);
+  border-radius: 1rem;
+  min-height: 44px;
+  padding: 0.5rem 0.95rem 0.5rem 0.72rem;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 120ms ease,
+    box-shadow 140ms ease;
+}
+
+.student-tickets-shell .back-btn:hover {
+  background: rgba(30, 41, 59, 0.86);
+  border-color: rgba(99, 102, 241, 0.38);
+}
+
+.student-tickets-shell .back-btn:active {
+  transform: translateY(1px);
+}
+
+.student-tickets-shell .back-btn:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.85);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
+}
+
+.student-tickets-shell .back-btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.14);
+  color: #818cf8;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.student-tickets-shell .back-btn-icon svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.student-tickets-shell .back-btn-text {
+  line-height: 1;
+}
+
+.student-tickets-shell .summary-item {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.68));
+  border-radius: 1.4rem;
+  padding: 0.9rem 1rem;
+  display: grid;
+  gap: 0.15rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.student-tickets-shell .summary-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.student-tickets-shell .summary-value {
+  color: var(--ink);
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.student-tickets-shell .inline-feedback {
+  margin-top: 0.85rem;
+  border-radius: 1rem;
+  padding: 0.7rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.84rem;
+  border: 1px solid transparent;
+}
+
+.student-tickets-shell .inline-feedback.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.student-tickets-shell .inline-feedback.error {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+  border-color: rgba(244, 63, 94, 0.22);
+}
+
+.student-tickets-shell .my-ticket-toolbar {
+  margin-top: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.8rem;
+  align-items: center;
+}
+
+.student-tickets-shell .toolbar-hint {
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+}
+
+.student-tickets-shell .my-ticket-toolbar .secondary-btn,
+.student-tickets-shell .my-ticket-toolbar .ghost-btn {
+  width: auto;
+  min-height: 42px;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.92rem;
+}
+
+.student-tickets-shell .my-ticket-toolbar .secondary-btn {
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #4338ca, #6366f1);
+  box-shadow: 0 14px 26px rgba(79, 70, 229, 0.28);
+}
+
+.student-tickets-shell .my-ticket-toolbar .ghost-btn {
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: rgba(15, 23, 42, 0.64);
+}
+
+.student-tickets-shell .complaint-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.student-tickets-shell .complaint-card {
+  border: 1px solid var(--border);
+  border-left: 4px solid rgba(148, 163, 184, 0.72);
+  border-radius: 1.5rem;
+  padding: 0.95rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.74));
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+.student-tickets-shell .complaint-card.status-pending { border-left-color: #f59e0b; }
+.student-tickets-shell .complaint-card.status-in_progress { border-left-color: #818cf8; }
+.student-tickets-shell .complaint-card.status-resolved { border-left-color: #10b981; }
+.student-tickets-shell .complaint-card.status-rejected { border-left-color: #f43f5e; }
+
+.student-tickets-shell .ticket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.student-tickets-shell .complaint-card h3 {
+  margin: 0.6rem 0 0.32rem;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+
+.student-tickets-shell .complaint-card p {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.5;
+}
+
+.student-tickets-shell .chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.student-tickets-shell .chip {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.18rem 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+.student-tickets-shell .ticket-id {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.student-tickets-shell .chip.category { background: rgba(148, 163, 184, 0.12); color: #cbd5e1; }
+.student-tickets-shell .status-pending { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+.student-tickets-shell .status-in_progress { background: rgba(99, 102, 241, 0.16); color: #a5b4fc; }
+.student-tickets-shell .status-resolved { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+.student-tickets-shell .status-rejected { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+.student-tickets-shell .priority-low { background: rgba(56, 189, 248, 0.12); color: #7dd3fc; }
+.student-tickets-shell .priority-medium { background: rgba(99, 102, 241, 0.14); color: #c7d2fe; }
+.student-tickets-shell .priority-high { background: rgba(245, 158, 11, 0.14); color: #fcd34d; }
+.student-tickets-shell .priority-urgent { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+
+.student-tickets-shell .meta-grid {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.38rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  background: rgba(2, 6, 23, 0.42);
+  border: 1px solid rgba(51, 65, 85, 0.72);
+  border-radius: 1rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.student-tickets-shell .meta-item {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.student-tickets-shell .meta-item dt,
+.student-tickets-shell .meta-item dd {
+  margin: 0;
+}
+
+.student-tickets-shell .meta-item dt {
+  color: var(--muted);
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-tickets-shell .meta-item dd {
+  color: var(--ink-soft);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.student-tickets-shell .ticket-card-actions {
+  margin-top: 0.72rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.student-tickets-shell .ticket-card-actions .ghost-btn {
+  width: auto;
+  min-height: 38px;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(99, 102, 241, 0.24);
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.12);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 0.5rem 0.92rem;
+}
+
+.student-tickets-shell .empty-state {
+  color: var(--ink-soft);
+  border: 1px dashed rgba(51, 65, 85, 0.9);
+  background: rgba(15, 23, 42, 0.62);
+  border-radius: 1rem;
+  font-weight: 700;
+  padding: 1rem;
+}
+
+.student-panel .reveal {
+  animation: studentPanelReveal 420ms ease both;
+}
+
+.student-panel .delay {
+  animation-delay: 110ms;
+}
+
+@media (max-width: 900px) {
+  .student-tickets-shell .tickets-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-tickets-shell .ticket-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .student-tickets-shell .complaint-list {
+    grid-template-columns: 1fr;
+  }
+
+  .student-tickets-shell .meta-item {
+    grid-template-columns: 1fr;
+    gap: 0.08rem;
+  }
+}
+
+@keyframes studentPanelReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

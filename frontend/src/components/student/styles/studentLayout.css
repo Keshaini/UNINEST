@@ -1,0 +1,157 @@
+.student-panel {
+  --panel-bg: #0a0c10;
+  --surface: rgba(15, 23, 42, 0.88);
+  --surface-soft: rgba(15, 23, 42, 0.72);
+  --surface-muted: rgba(30, 41, 59, 0.4);
+  --surface-elevated: rgba(19, 27, 46, 0.96);
+  --border: rgba(51, 65, 85, 0.78);
+  --border-soft: rgba(99, 102, 241, 0.16);
+  --muted: #64748b;
+  --muted-strong: #94a3b8;
+  --ink: #f8fafc;
+  --ink-soft: #cbd5e1;
+  --line: rgba(51, 65, 85, 0.72);
+  --primary: #6366f1;
+  --primary-strong: #4f46e5;
+  --primary-soft: rgba(99, 102, 241, 0.14);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #f43f5e;
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100vh;
+  position: relative;
+  background:
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 22rem),
+    radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.08), transparent 24rem),
+    linear-gradient(180deg, #0a0c10 0%, #0b1020 100%);
+  overflow: hidden;
+}
+
+.student-panel::before,
+.student-panel::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(70px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.student-panel::before {
+  width: 18rem;
+  height: 18rem;
+  top: -6rem;
+  right: -4rem;
+  background: rgba(99, 102, 241, 0.28);
+}
+
+.student-panel::after {
+  width: 16rem;
+  height: 16rem;
+  left: -4rem;
+  bottom: -5rem;
+  background: rgba(59, 130, 246, 0.16);
+}
+
+.student-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.student-panel .panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid var(--border);
+  padding: clamp(1.25rem, 2vw, 1.8rem);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.82));
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.student-panel .panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 34%);
+  pointer-events: none;
+}
+
+.student-panel .panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.student-panel .form-panel,
+.student-panel .tickets-panel {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.student-form-shell,
+.student-tickets-shell {
+  gap: 0;
+  padding: clamp(1rem, 1.8vw, 1.5rem);
+  min-height: 100dvh;
+  height: auto;
+  grid-template-columns: minmax(0, 1fr);
+  background: transparent;
+  overflow-x: hidden;
+}
+
+.student-form-shell .form-panel,
+.student-tickets-shell .tickets-panel {
+  min-height: calc(100dvh - clamp(2rem, 3.6vw, 3rem));
+}
+
+.student-panel .form-visual {
+  min-height: clamp(320px, 45vw, 560px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: clamp(1.2rem, 2vw, 2rem);
+  color: var(--ink);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0.7)),
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.3), transparent 32%),
+    linear-gradient(135deg, #182036 0%, #0f172a 100%);
+  border-radius: 2rem;
+  border: 1px solid var(--border);
+}
+
+.student-panel .form-visual p {
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  max-width: 18rem;
+  color: rgba(248, 250, 252, 0.9);
+}
+
+@media (min-width: 900px) {
+  .student-form-shell .split-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  .student-form-shell,
+  .student-tickets-shell {
+    min-height: 100dvh;
+    padding: clamp(0.8rem, 3.5vw, 1rem);
+  }
+
+  .student-form-shell .form-panel,
+  .student-tickets-shell .tickets-panel {
+    min-height: calc(100dvh - clamp(1.6rem, 7vw, 2rem));
+    border-radius: 1.5rem;
+    padding: clamp(1rem, 4vw, 1.15rem);
+  }
+
+  .student-form-shell .split-row {
+    grid-template-columns: 1fr;
+  }
+}

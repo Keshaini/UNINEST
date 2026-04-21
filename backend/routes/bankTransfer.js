@@ -5,7 +5,6 @@ const Invoice = require('../models/Invoice');
 const PaymentMethod = require('../models/PaymentMethod');
 const Notification = require('../models/Notification');
 const upload = require('../middleware/upload');
-const authMiddleware = require('../middleware/auth');
 const { validateAmount } = require('../utils/validators');
 
 // Submit bank transfer payment

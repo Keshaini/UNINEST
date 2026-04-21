@@ -18,7 +18,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-white shadow-lg sticky top-0 z-50 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -26,14 +26,14 @@ function Navbar() {
             onClick={() => navigate('/')} 
             className="flex items-center space-x-2 cursor-pointer group"
           >
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-lg group-hover:shadow-lg transition-all duration-300">
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-2 rounded-lg group-hover:shadow-lg group-hover:shadow-indigo-500/50 transition-all duration-300">
               <span className="text-2xl">🏠</span>
             </div>
             <div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 UniNest
               </span>
-              <p className="text-xs text-gray-500 -mt-1">Hostel Management</p>
+              <p className="text-xs text-slate-500 -mt-1">Hostel Management</p>
             </div>
           </div>
 
@@ -45,7 +45,7 @@ function Navbar() {
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 isActive('/') && !isBillingActive()
                   ? 'text-indigo-600 bg-indigo-50'
-                  : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                  : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'
               }`}
             >
               <Home size={18} />
@@ -56,13 +56,13 @@ function Navbar() {
             <div className="relative group">
               <button
                 disabled
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-gray-400 cursor-not-allowed opacity-60"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-slate-400 cursor-not-allowed opacity-60"
                 title="Component 1 - Student Registration (Other Team Member)"
               >
                 <Users size={18} />
                 <span>Students</span>
               </button>
-              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-100 text-slate-700 text-xs rounded shadow-lg whitespace-nowrap border border-slate-200">
                 Component 1 - Other Team Member
               </div>
             </div>
@@ -71,13 +71,13 @@ function Navbar() {
             <div className="relative group">
               <button
                 disabled
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-gray-400 cursor-not-allowed opacity-60"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-slate-400 cursor-not-allowed opacity-60"
                 title="Component 2 - Accommodation Management (Other Team Member)"
               >
                 <Building2 size={18} />
                 <span>Rooms</span>
               </button>
-              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-100 text-slate-700 text-xs rounded shadow-lg whitespace-nowrap border border-slate-200">
                 Component 2 - Other Team Member
               </div>
             </div>
@@ -89,7 +89,7 @@ function Navbar() {
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   isBillingActive()
                     ? 'text-indigo-600 bg-indigo-50'
-                    : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50'
+                    : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'
                 }`}
               >
                 <CreditCard size={18} />
@@ -157,13 +157,13 @@ function Navbar() {
             <div className="relative group">
               <button
                 disabled
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-gray-400 cursor-not-allowed opacity-60"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-slate-400 cursor-not-allowed opacity-60"
                 title="Component 4 - Complaint & Maintenance (Other Team Member)"
               >
                 <Wrench size={18} />
                 <span>Complaints</span>
               </button>
-              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-lg whitespace-nowrap">
+              <div className="absolute hidden group-hover:block top-full left-0 mt-1 px-3 py-1 bg-gray-100 text-slate-700 text-xs rounded shadow-lg whitespace-nowrap border border-slate-200">
                 Component 4 - Other Team Member
               </div>
             </div>

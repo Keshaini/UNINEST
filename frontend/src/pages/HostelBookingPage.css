@@ -2,9 +2,14 @@
 
 /* Main container */
 .booking-page-container {
-  background: linear-gradient(135deg, #f0f4f8 0%, #f8f9fa 100%);
+  background-color: #0a0c10;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.1) 0, transparent 50%);
   min-height: 100vh;
-  padding: 2.5rem 1rem;
+  padding: 3rem 1.5rem;
+  color: #cbd5e1;
 }
 
 /* Grid layout enhancements */
@@ -24,43 +29,71 @@
 
 /* Card styles */
 .booking-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+}
+
+.booking-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.booking-card:hover::before {
+  opacity: 1;
 }
 
 .booking-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #cbd5e0;
+  transform: translateY(-5px);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.05);
 }
 
 /* Header styles */
 .booking-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .booking-header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e40af;
-  margin: 0 0 0.5rem 0;
-  letter-spacing: -0.5px;
+  font-size: 2.25rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -1px;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
 }
 
 .booking-header p {
-  font-size: 0.875rem;
-  color: #9ca3af;
+  font-size: 0.95rem;
+  color: #64748b;
   margin: 0;
+  font-weight: 500;
 }
 
 /* Hostel info section */
 .hostel-info-section {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(30, 41, 59, 0.4);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .hostel-info-item {
@@ -78,21 +111,27 @@
 }
 
 .hostel-name {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
 .hostel-location {
-  font-size: 0.875rem;
-  color: #3b82f6;
-  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  color: #818cf8;
+  margin-top: 0.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .hostel-details {
-  font-size: 0.875rem;
-  color: #4b5563;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #94a3b8;
+  line-height: 1.8;
+  margin-top: 1.5rem;
 }
 
 .hostel-details p {
@@ -100,26 +139,33 @@
 }
 
 .detail-value {
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 800;
+  color: #f8fafc;
 }
 
 /* Back button styles */
 .back-button {
-  margin-top: 1.5rem;
-  color: #3b82f6;
-  text-decoration: underline;
+  margin-top: 2rem;
+  color: #64748b;
+  text-decoration: none;
   font-size: 0.875rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: none;
-  border: none;
-  padding: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .back-button:hover {
-  color: #1e40af;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 /* Form styles */
@@ -145,30 +191,31 @@
 .form-input,
 .form-select {
   width: 100%;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.625rem 0.75rem;
-  font-size: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.875rem 1rem;
+  font-size: 0.95rem;
   font-family: inherit;
-  transition: all 0.2s ease;
-  background-color: #ffffff;
+  transition: all 0.3s ease;
+  background-color: rgba(15, 23, 42, 0.8);
+  color: #ffffff;
 }
 
 .form-input:focus,
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  background-color: #f0f9ff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 0 20px rgba(99, 102, 241, 0.1);
+  background-color: rgba(30, 41, 59, 1);
 }
 
 .form-input::placeholder {
-  color: #d1d5db;
+  color: #9ca3af;
 }
 
 .form-input:disabled,
 .form-select:disabled {
-  background-color: #f9fafb;
+  background-color: rgba(243, 244, 246, 0.7);
   color: #9ca3af;
   cursor: not-allowed;
 }
@@ -186,7 +233,7 @@
 
 .error-message {
   font-size: 0.75rem;
-  color: #dc2626;
+  color: #ff7675;
   margin-top: 0.25rem;
   animation: slideInError 0.2s ease;
 }
@@ -224,15 +271,15 @@
 }
 
 .alert-error {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border-color: #fecaca;
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #ff7675;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .alert-success {
-  background-color: #ecfdf5;
-  color: #065f46;
-  border-color: #a7f3d0;
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #52c41a;
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 /* Button styles */
@@ -251,16 +298,19 @@
 }
 
 .submit-button-primary {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   color: white;
   width: 100%;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 14px;
 }
 
 .submit-button-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px rgba(79, 70, 229, 0.5), 0 0 15px rgba(99, 102, 241, 0.3);
+  background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
 }
 
 .submit-button-primary:active:not(:disabled) {
@@ -268,15 +318,15 @@
 }
 
 .submit-button-primary:disabled {
-  background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+  background: linear-gradient(135deg, #475569 0%, #64748b 100%);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .button-secondary {
-  background-color: white;
-  color: #2563eb;
-  border: 1.5px solid #2563eb;
+  background-color: transparent;
+  color: #6366f1;
+  border: 1.5px solid #6366f1;
   padding: 0.625rem 1rem;
   border-radius: 8px;
   font-weight: 600;
@@ -288,12 +338,12 @@
 }
 
 .button-secondary:hover {
-  background-color: #f0f9ff;
-  border-color: #1d4ed8;
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: #818cf8;
 }
 
 .button-secondary:active {
-  background-color: #e0f2fe;
+  background-color: rgba(99, 102, 241, 0.2);
 }
 
 /* Success state */
@@ -336,12 +386,12 @@
 .success-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #059669;
+  color: #52c41a;
   margin: 1rem 0;
 }
 
 .success-message {
-  color: #4b5563;
+  color: #cbd5e1;
   margin-bottom: 1.5rem;
   line-height: 1.6;
 }
@@ -368,7 +418,7 @@
 }
 
 .loading-text {
-  color: #6b7280;
+  color: #94a3b8;
   margin-top: 1rem;
   font-weight: 500;
 }

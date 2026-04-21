@@ -1,5 +1,5 @@
+const mongoose = require("mongoose");
 const Booking = require("../models/booking");
-const Room = require("../models/Room");
 
 const parsePositiveInteger = (value) => {
   const parsed = Number(value);
@@ -31,33 +31,49 @@ exports.createBooking = async (req, res) => {
       bedsRequested,
     };
 
+    const db = mongoose.connection.db;
+    const roomsCollection = db.collection('rooms');
+    const { ObjectId } = require('mongodb');
+
     if (req.body.hostelId) {
-      const room = await Room.findById(req.body.hostelId);
+      // Fetch room via raw driver to avoid Mongoose validator issues
+      let room;
+      try {
+        room = await roomsCollection.findOne({ _id: new ObjectId(req.body.hostelId) });
+      } catch (e) {
+        room = null;
+      }
 
       if (!room) {
         return res.status(404).json({ error: "Selected hostel not found." });
       }
 
-      if (bedsRequested > (room.bedsAvailable || 0)) {
+      const currentBeds = Number(room.bedsAvailable) || 0;
+      if (bedsRequested > currentBeds) {
         return res.status(400).json({ error: "Requested bed count exceeds available beds." });
       }
 
+      // Save booking to MongoDB
       const booking = new Booking(payload);
       await booking.save();
 
-      room.bedsAvailable = Math.max(0, (room.bedsAvailable || 0) - bedsRequested);
-      room.status = room.bedsAvailable === 0 ? "Full" : room.status || "Open";
-      await room.save();
+      // Update room availability using raw driver (bypass Atlas validators)
+      const newBeds = Math.max(0, currentBeds - bedsRequested);
+      const newStatus = newBeds === 0 ? "Full" : room.status || "Open";
+      await roomsCollection.updateOne(
+        { _id: new ObjectId(req.body.hostelId) },
+        { $set: { bedsAvailable: newBeds, status: newStatus, updatedAt: new Date() } }
+      );
 
       return res.status(201).json(booking);
+
     } else if (req.body.roomNumber) {
       const booking = new Booking(payload);
       await booking.save();
 
-      // Keep legacy booking behavior for roomNumber payloads.
-      await Room.findOneAndUpdate(
+      await roomsCollection.updateOne(
         { roomNumber: req.body.roomNumber },
-        { status: "Occupied" }
+        { $set: { status: "Occupied", updatedAt: new Date() } }
       );
 
       return res.status(201).json(booking);
@@ -65,6 +81,7 @@ exports.createBooking = async (req, res) => {
 
     return res.status(400).json({ error: "hostelId or roomNumber is required for booking." });
   } catch (err) {
+    console.error("❌ Booking error:", err.message);
     res.status(500).json({ error: err.message });
   }
 };

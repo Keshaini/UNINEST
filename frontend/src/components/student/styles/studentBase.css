@@ -1,0 +1,364 @@
+.student-panel .panel-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+.student-panel .panel-header p {
+  margin: 0.35rem 0 0;
+  color: var(--muted-strong);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.student-panel .form-panel .panel-header h2 {
+  font-size: clamp(1.9rem, 3vw, 2.55rem);
+  letter-spacing: -0.04em;
+}
+
+.student-panel .form-panel .panel-header p {
+  font-size: 1rem;
+  max-width: 42rem;
+}
+
+.student-panel .complaint-form,
+.student-panel .form-row {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.student-panel .complaint-form {
+  margin-top: 1.25rem;
+  gap: 1rem;
+}
+
+.student-panel .lock-note,
+.student-panel .form-row label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.student-panel .lock-note {
+  font-size: 0.72rem;
+}
+
+.student-panel .field-validation-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.student-panel .field-validation-note.error {
+  color: #fda4af;
+}
+
+.student-panel input,
+.student-panel select,
+.student-panel textarea {
+  width: 100%;
+  border-radius: 1.15rem;
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--ink);
+  padding: 0.9rem 1rem;
+  font: inherit;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.student-panel input::placeholder,
+.student-panel textarea::placeholder {
+  color: #7c8aa5;
+}
+
+.student-panel input:disabled,
+.student-panel select:disabled,
+.student-panel textarea:disabled {
+  opacity: 0.78;
+  cursor: not-allowed;
+}
+
+.student-panel input:focus,
+.student-panel select:focus,
+.student-panel textarea:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.85);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
+  background: rgba(15, 23, 42, 0.84);
+}
+
+.student-panel .form-row.has-error textarea {
+  border-color: rgba(244, 63, 94, 0.72);
+  box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12);
+}
+
+.student-panel textarea {
+  resize: vertical;
+}
+
+.student-panel select,
+.student-panel input,
+.student-panel textarea {
+  color-scheme: dark;
+}
+
+.student-panel .split-row {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.student-panel .form-actions {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 0.55rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.student-panel .primary-btn,
+.student-panel .secondary-btn,
+.student-panel .ghost-btn {
+  border-radius: 1rem;
+  padding: 0.78rem 1.05rem;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.student-panel .primary-btn {
+  border: none;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: #fff;
+  box-shadow: 0 18px 34px rgba(79, 70, 229, 0.3);
+}
+
+.student-panel .secondary-btn {
+  border: 1px solid rgba(51, 65, 85, 0.85);
+  background: rgba(30, 41, 59, 0.82);
+  color: var(--ink);
+}
+
+.student-panel .ghost-btn {
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.56);
+  color: var(--ink-soft);
+}
+
+.student-panel .primary-btn:hover,
+.student-panel .secondary-btn:hover,
+.student-panel .ghost-btn:hover {
+  transform: translateY(-1px);
+}
+
+.student-panel .primary-btn:hover {
+  box-shadow: 0 22px 38px rgba(79, 70, 229, 0.36);
+}
+
+.student-panel .secondary-btn:hover,
+.student-panel .ghost-btn:hover {
+  border-color: rgba(99, 102, 241, 0.34);
+  background: rgba(30, 41, 59, 0.92);
+}
+
+.student-panel .primary-btn:disabled,
+.student-panel .secondary-btn:disabled,
+.student-panel .ghost-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.student-form-shell .panel-header h2 {
+  color: #ffffff;
+}
+
+.student-form-shell .panel-header p {
+  color: var(--muted-strong);
+  margin-top: 0.45rem;
+}
+
+.student-form-shell .inline-feedback {
+  margin-top: 0.9rem;
+  border-radius: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid transparent;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.student-form-shell .inline-feedback.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.student-form-shell .inline-feedback.error {
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+  border-color: rgba(244, 63, 94, 0.22);
+}
+
+.student-form-shell .complaint-form {
+  gap: 1rem;
+  width: 100%;
+}
+
+.student-form-shell .form-grid {
+  display: grid;
+  gap: 0.92rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-form-shell .wide-field {
+  grid-column: 1 / -1;
+}
+
+.student-form-shell .priority-options {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.student-form-shell .priority-options legend {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 0;
+  margin-bottom: 0.15rem;
+}
+
+.student-form-shell .priority-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.student-form-shell .priority-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(51, 65, 85, 0.76);
+  border-radius: 1.2rem;
+  padding: 0.82rem 0.88rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.68));
+  display: grid;
+  gap: 0.18rem;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.student-form-shell .priority-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 38%);
+  pointer-events: none;
+}
+
+.student-form-shell .priority-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.student-form-shell .priority-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.student-form-shell .priority-card .priority-title {
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 0.98rem;
+}
+
+.student-form-shell .priority-card .priority-copy {
+  color: var(--muted-strong);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.student-form-shell .priority-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.42);
+}
+
+.student-form-shell .priority-card.active {
+  border-color: rgba(99, 102, 241, 0.82);
+  background: linear-gradient(180deg, rgba(49, 46, 129, 0.78), rgba(30, 41, 59, 0.86));
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.student-form-shell .form-actions {
+  margin-top: 0.45rem;
+  justify-content: flex-end;
+}
+
+.student-form-shell .form-validation-note {
+  margin: 0 auto 0 0;
+  color: #fbbf24;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.student-form-shell .form-panel .primary-btn,
+.student-form-shell .form-panel .ghost-btn {
+  width: auto;
+  min-height: 46px;
+  min-width: 170px;
+  padding-inline: 1.2rem;
+}
+
+.student-form-shell .form-panel .ghost-btn {
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.9);
+  color: var(--ink-soft);
+}
+
+@media (min-width: 1200px) {
+  .student-form-shell .priority-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .student-form-shell .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-form-shell .priority-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-form-shell .form-actions {
+    display: grid;
+  }
+
+  .student-form-shell .form-validation-note {
+    margin: 0;
+  }
+
+  .student-form-shell .form-panel .primary-btn,
+  .student-form-shell .form-panel .ghost-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}

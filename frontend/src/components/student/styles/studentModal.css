@@ -1,0 +1,413 @@
+.student-panel .ticket-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  padding: clamp(0.5rem, 1vw, 0.9rem);
+}
+
+.student-panel .ticket-modal {
+  width: min(1520px, 100%);
+  height: 100%;
+  max-height: calc(100dvh - 0.4rem);
+  background: linear-gradient(180deg, rgba(10, 12, 16, 0.98), rgba(11, 16, 32, 0.96));
+  border-radius: 2rem;
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.42);
+}
+
+.student-panel .ticket-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.student-panel .ticket-modal-header h3,
+.student-panel .ticket-full-info h4,
+.student-panel .ticket-chat-box h4 {
+  margin: 0;
+}
+
+.student-panel .ticket-modal-header h3 {
+  font-size: clamp(1.25rem, 1.8vw, 1.6rem);
+  color: var(--ink);
+}
+
+.student-panel .modal-close-btn {
+  width: auto;
+  min-height: 42px;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--ink);
+  padding: 0.45rem 0.9rem 0.45rem 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease, transform 120ms ease;
+}
+
+.student-panel .modal-close-btn:hover {
+  background: rgba(30, 41, 59, 0.86);
+  border-color: rgba(99, 102, 241, 0.34);
+}
+
+.student-panel .modal-close-btn:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.82);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
+}
+
+.student-panel .modal-close-btn:active {
+  transform: translateY(1px);
+}
+
+.student-panel .modal-close-icon {
+  width: 1.18rem;
+  height: 1.18rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(99, 102, 241, 0.14);
+  color: #a5b4fc;
+}
+
+.student-panel .modal-close-icon svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+
+.student-panel .modal-message {
+  margin: 0.8rem 1.2rem 0;
+}
+
+.student-panel .ticket-modal-body {
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.student-panel .ticket-full-info,
+.student-panel .ticket-chat-box {
+  border: 1px solid var(--border);
+  border-radius: 1.6rem;
+  padding: 0.95rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.72));
+  min-height: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.student-panel .ticket-full-info {
+  display: grid;
+  gap: 0.72rem;
+  align-content: start;
+}
+
+.student-panel .ticket-info-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.student-panel .ticket-ref {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.student-panel .ticket-description {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.student-panel .ticket-full-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.7rem 0.78rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(51, 65, 85, 0.72);
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.student-panel .ticket-full-meta .meta-item {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.student-panel .ticket-full-meta .meta-item dt,
+.student-panel .ticket-full-meta .meta-item dd {
+  margin: 0;
+}
+
+.student-panel .ticket-full-meta .meta-item dt {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.student-panel .ticket-full-meta .meta-item dd {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.student-panel .support-notes {
+  margin-top: 0.1rem;
+  padding: 0.7rem 0.78rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(51, 65, 85, 0.72);
+  background: rgba(2, 6, 23, 0.38);
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.student-panel .support-notes.muted {
+  color: var(--muted-strong);
+}
+
+.student-panel .ticket-chat-box {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+}
+
+.student-panel .chat-box-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.student-panel .chat-subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.student-panel .chat-live-badge {
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  padding: 0.22rem 0.62rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  white-space: nowrap;
+}
+
+.student-panel .chat-live-badge[title*='backup'] {
+  border-color: rgba(245, 158, 11, 0.26);
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
+.student-panel .chat-live-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.95;
+}
+
+.student-panel .chat-thread {
+  margin-top: 0;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  border-radius: 1.2rem;
+  min-height: 260px;
+  height: 100%;
+  overflow: auto;
+  padding: 0.75rem;
+  background: rgba(2, 6, 23, 0.5);
+  display: grid;
+  gap: 0.55rem;
+}
+
+.student-panel .chat-empty-state {
+  border: 1px dashed rgba(51, 65, 85, 0.88);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.7rem 0.78rem;
+  color: var(--muted-strong);
+}
+
+.student-panel .chat-empty-state strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 0.18rem;
+}
+
+.student-panel .chat-empty-state p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.student-panel .chat-message {
+  border-radius: 1rem;
+  padding: 0.55rem 0.65rem;
+  max-width: min(82%, 580px);
+  border: 1px solid transparent;
+}
+
+.student-panel .chat-message.student {
+  justify-self: end;
+  background: rgba(79, 70, 229, 0.18);
+  border-color: rgba(99, 102, 241, 0.28);
+}
+
+.student-panel .chat-message.support {
+  justify-self: start;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.22);
+}
+
+.student-panel .chat-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.student-panel .chat-message p {
+  margin-top: 0.24rem;
+  margin-bottom: 0;
+  white-space: pre-wrap;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.student-panel .chat-form {
+  margin-top: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.student-panel .chat-input-label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.student-panel .chat-form textarea {
+  min-height: 96px;
+  border: 1px solid rgba(51, 65, 85, 0.76);
+  border-radius: 1rem;
+  padding: 0.78rem 0.82rem;
+  resize: vertical;
+  background: rgba(15, 23, 42, 0.72);
+  color: var(--ink);
+}
+
+.student-panel .chat-form textarea::placeholder {
+  color: #7c8aa5;
+}
+
+.student-panel .chat-form-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.student-panel .chat-helper-text,
+.student-panel .chat-char-count {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.student-panel .send-chat-btn {
+  justify-self: end;
+  width: auto;
+  min-width: 195px;
+  min-height: 44px;
+  border-radius: 1rem;
+  padding: 0.62rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.student-panel .send-chat-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  display: inline-block;
+}
+
+.student-panel .send-chat-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+@media (min-width: 768px) {
+  .student-panel .ticket-modal-body {
+    grid-template-columns: minmax(360px, 0.95fr) minmax(420px, 1.05fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .student-panel .ticket-modal {
+    max-height: calc(100dvh - 0.2rem);
+    border-radius: 1.4rem;
+  }
+
+  .student-panel .ticket-modal-body {
+    overflow: auto;
+    align-items: start;
+    padding: 0.85rem;
+  }
+
+  .student-panel .ticket-full-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .student-panel .chat-box-head {
+    flex-direction: column;
+  }
+
+  .student-panel .chat-form-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-panel .send-chat-btn {
+    justify-self: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+}

@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/admin/Sidebar';
 import Navbar from '../components/admin/Navbar';
 import DashboardMain from './admin/DashboardMain';
-import ManageRooms from './admin/ManageRooms';
+import AdminHostelManagementSystem from './AdminHostelManagementSystem';
 import ManageStudents from './admin/ManageStudents';
 import ManageAllocations from './admin/ManageAllocations';
 import ManageComplaints from './admin/ManageComplaints';
-import ManagePayments from './admin/ManagePayments';
 import ManageNotices from './admin/ManageNotices';
 import AdminProfile from './admin/AdminProfile';
+import InvoiceList from './admin/InvoiceList';
+import InvoiceCreate from './admin/InvoiceCreate';
+import Reports from './admin/Reports';
+import DiscountManagement from './admin/DiscountManagement';
+import PaymentVerification from './admin/PaymentVerification';
+import SupportService from './admin/SupportService';
 
 function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('Dashboard');
@@ -33,15 +38,19 @@ function AdminDashboard() {
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'Dashboard': return <DashboardMain />;
-            case 'Students': return <ManageStudents />;
-            case 'Rooms': return <ManageRooms />;
-            case 'Payments': return <ManagePayments />;
-            case 'Complaints': return <ManageComplaints />;
-            case 'Allocations': return <ManageAllocations />;
-            case 'Notices': return <ManageNotices />;
-            case 'Profile': return <AdminProfile />;
-            default: return <DashboardMain />;
+            case 'Dashboard':       return <DashboardMain />;
+            case 'Students':        return <ManageStudents />;
+            case 'Rooms':           return <AdminHostelManagementSystem />;
+            case 'Complaints':      return <ManageComplaints />;
+            case 'Support Service': return <SupportService />;
+            case 'Allocations':     return <ManageAllocations />;
+            case 'Notices':         return <ManageNotices />;
+            case 'Billing':         return <PaymentVerification />;
+            case 'Invoices':        return <InvoiceList />;
+            case 'Reports':         return <Reports />;
+            case 'Discounts':       return <DiscountManagement />;
+            case 'Profile':         return <AdminProfile />;
+            default:                return <DashboardMain />;
         }
     };
 

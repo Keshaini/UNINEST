@@ -1,0 +1,89 @@
+.support-panel .complaint-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.support-panel .empty-state {
+  color: var(--ink-soft);
+  font-weight: 700;
+  border: 1px dashed rgba(51, 65, 85, 0.9);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.52);
+  padding: 1rem;
+}
+
+.support-panel .complaint-card {
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(15, 23, 42, 0.72));
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.22);
+}
+
+.support-panel .complaint-card h3 {
+  margin: 0.55rem 0 0.32rem;
+  font-size: 1.04rem;
+  color: var(--ink);
+}
+
+.support-panel .complaint-card p {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.5;
+}
+
+.support-panel .complaint-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.support-panel .subtext {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.support-panel .chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.support-panel .chip {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.18rem 0.58rem;
+  letter-spacing: 0.05em;
+}
+
+.support-panel .status-pending { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+.support-panel .status-in_progress { background: rgba(99, 102, 241, 0.16); color: #a5b4fc; }
+.support-panel .status-resolved { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+.support-panel .status-rejected { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+.support-panel .priority-low { background: rgba(56, 189, 248, 0.12); color: #7dd3fc; }
+.support-panel .priority-medium { background: rgba(99, 102, 241, 0.14); color: #c7d2fe; }
+.support-panel .priority-high { background: rgba(245, 158, 11, 0.14); color: #fcd34d; }
+.support-panel .priority-urgent { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+
+.support-panel .support-edit-grid {
+  margin-top: 0.7rem;
+}
+
+.support-panel .action-row {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.support-panel .meta-grid {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.24rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
