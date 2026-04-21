@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CheckCircle2, Clock3, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_LABEL, STATUS_OPTIONS } from '../../data/complaintData';
 import StudentTicketCard from './StudentTicketCard';
@@ -31,6 +32,11 @@ const StudentTicketsSection = ({
     const status = ticket.status?.toLowerCase?.() || '';
     return status === selectedTicketTab;
   });
+  const summaryCards = [
+    { id: 'total', label: 'Total Tickets', note: 'All complaints recorded', value: totalTickets, Icon: Ticket },
+    { id: 'open', label: 'Open Queue', note: 'Pending and in progress', value: openTickets, Icon: Clock3 },
+    { id: 'resolved', label: 'Resolved', note: 'Closed successfully', value: resolvedTickets, Icon: CheckCircle2 },
+  ];
   const activeStatusLabel = STATUS_LABEL[selectedTicketTab]?.toLowerCase() || selectedTicketTab;
   const emptyStateMessage = totalTickets === 0 ? 'No complaints found for this student.' : `No ${activeStatusLabel} tickets found for this student.`;
 
@@ -69,18 +75,20 @@ const StudentTicketsSection = ({
 
       {currentStudentId ? (
         <div className="ticket-summary" aria-label="Ticket summary">
-          <div className="summary-item">
-            <span className="summary-label">Total</span>
-            <strong className="summary-value">{totalTickets}</strong>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">Open</span>
-            <strong className="summary-value">{openTickets}</strong>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">Resolved</span>
-            <strong className="summary-value">{resolvedTickets}</strong>
-          </div>
+          {summaryCards.map(({ id, label, note, value, Icon }) => (
+            <div key={id} className={`summary-item summary-${id}`}>
+              <div className="summary-top">
+                <div className="summary-copy">
+                  <span className="summary-label">{label}</span>
+                  <p className="summary-note">{note}</p>
+                </div>
+                <span className="summary-icon" aria-hidden="true">
+                  <Icon size={18} strokeWidth={2.2} />
+                </span>
+              </div>
+              <strong className="summary-value">{value}</strong>
+            </div>
+          ))}
         </div>
       ) : null}
 
