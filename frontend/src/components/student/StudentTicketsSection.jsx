@@ -1,5 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { STATUS_LABEL, STATUS_OPTIONS } from '../../data/complaintData';
 import StudentTicketCard from './StudentTicketCard';
+
+const OPEN_TICKET_STATUSES = ['pending', 'in_progress'];
 
 const StudentTicketsSection = ({
   currentStudentId,
@@ -11,9 +15,34 @@ const StudentTicketsSection = ({
   showOpenButton = true,
 }) => {
   const navigate = useNavigate();
+  const [activeTicketTab, setActiveTicketTab] = useState('');
+  const [hasManualTabSelection, setHasManualTabSelection] = useState(false);
   const totalTickets = studentComplaints.length;
-  const openTickets = studentComplaints.filter((ticket) => ticket.status === 'pending' || ticket.status === 'in_progress').length;
-  const resolvedTickets = studentComplaints.filter((ticket) => ticket.status === 'resolved').length;
+  const openTickets = studentComplaints.filter((ticket) => OPEN_TICKET_STATUSES.includes(ticket.status?.toLowerCase?.() || '')).length;
+  const resolvedTickets = studentComplaints.filter((ticket) => (ticket.status?.toLowerCase?.() || '') === 'resolved').length;
+  const tabOptions = STATUS_OPTIONS.map((status) => ({
+    id: status,
+    label: STATUS_LABEL[status] || status,
+    count: studentComplaints.filter((ticket) => (ticket.status?.toLowerCase?.() || '') === status).length,
+  }));
+  const firstAvailableTab = tabOptions.find((tab) => tab.count > 0)?.id || STATUS_OPTIONS[0];
+  const selectedTicketTab = activeTicketTab || firstAvailableTab;
+  const filteredComplaints = studentComplaints.filter((ticket) => {
+    const status = ticket.status?.toLowerCase?.() || '';
+    return status === selectedTicketTab;
+  });
+  const activeStatusLabel = STATUS_LABEL[selectedTicketTab]?.toLowerCase() || selectedTicketTab;
+  const emptyStateMessage = totalTickets === 0 ? 'No complaints found for this student.' : `No ${activeStatusLabel} tickets found for this student.`;
+
+  useEffect(() => {
+    setActiveTicketTab('');
+    setHasManualTabSelection(false);
+  }, [currentStudentId]);
+
+  useEffect(() => {
+    if (!currentStudentId || hasManualTabSelection) return;
+    setActiveTicketTab(firstAvailableTab);
+  }, [currentStudentId, firstAvailableTab, hasManualTabSelection]);
 
   return (
     <article className="panel tickets-panel reveal delay">
@@ -79,12 +108,33 @@ const StudentTicketsSection = ({
         </div>
       ) : null}
 
+      {currentStudentId && studentComplaints.length > 0 ? (
+        <div className="ticket-filter-tabs" role="tablist" aria-label="Filter tickets by status">
+          {tabOptions.map((tab) => (
+            <button
+              key={tab.id}
+              className={`ticket-filter-tab ${selectedTicketTab === tab.id ? 'active' : ''}`}
+              type="button"
+              role="tab"
+              aria-selected={selectedTicketTab === tab.id}
+              onClick={() => {
+                setActiveTicketTab(tab.id);
+                setHasManualTabSelection(true);
+              }}
+            >
+              <span>{tab.label}</span>
+              <span className="ticket-filter-count">{tab.count}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div className="complaint-list">
         {!currentStudentId ? <p className="empty-state">No student profile found yet.</p> : null}
-        {currentStudentId && studentComplaints.length === 0 ? (
-          <p className="empty-state">No complaints found for this student.</p>
+        {currentStudentId && filteredComplaints.length === 0 ? (
+          <p className="empty-state">{emptyStateMessage}</p>
         ) : null}
-        {studentComplaints.map((complaint) => (
+        {filteredComplaints.map((complaint) => (
           <StudentTicketCard key={complaint._id} complaint={complaint} onOpenTicket={onOpenTicket} />
         ))}
       </div>
