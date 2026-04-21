@@ -1,0 +1,18 @@
+.feedback {
+  border-radius: 14px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.feedback.success {
+  color: #0b594f;
+  background: #dff3ee;
+  border: 1px solid rgba(11, 89, 79, 0.22);
+}
+
+.feedback.error {
+  color: #7a1f16;
+  background: #fbe7e4;
+  border: 1px solid rgba(122, 31, 22, 0.2);
+}
