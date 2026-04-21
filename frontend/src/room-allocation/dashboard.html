@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room Allocation Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="dashboard">
+    <main class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-chip">UNINEST</span>
+          <div>
+            <h1>Room Allocation System</h1>
+            <p>Manage hostel rooms, bed occupancy, and student assignments.</p>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-link" data-page="dashbard" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-page="rooms" href="rooms.html">Rooms</a>
+          <a class="nav-link" data-page="students" href="students.html">Students</a>
+          <a class="nav-link" data-page="allocate" href="allocate.html">Allocate</a>
+          <a class="nav-link" data-page="reports" href="reports.html">Reports</a>
+        </nav>
+      </header>
+
+      <section class="grid cards">
+        <article class="card">
+          <p class="kicker">Total Capacity</p>
+          <p class="metric">640</p>
+          <p class="metric-note">Across 4 hostel blocks</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Occupied Beds</p>
+          <p class="metric">512</p>
+          <p class="metric-note">80% utilization</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Vacant Beds</p>
+          <p class="metric">128</p>
+          <p class="metric-note">Most vacancies in Block C</p>
+        </article>
+        <article class="card">
+          <p class="kicker">Pending Requests</p>
+          <p class="metric">34</p>
+          <p class="metric-note">12 high-priority cases</p>
+        </article>
+      </section>
+
+      <section class="grid" style="grid-template-columns: 1.2fr 1fr; margin-top: 14px">
+        <article class="card">
+          <h2>Recent Allocations</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Room/Bed</th>
+                  <th>Reason</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recent-allocations"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Block Snapshot</h2>
+          <p><span class="badge ok">Block A: Healthy</span> 78% occupied</p>
+          <p><span class="badge warn">Block B: Monitor</span> 92% occupied</p>
+          <p><span class="badge ok">Block C: Available</span> 64% occupied</p>
+          <p><span class="badge danger">Block D: Critical</span> 98% occupied</p>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

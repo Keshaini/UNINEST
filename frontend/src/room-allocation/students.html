@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Students</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="students">
+    <main class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-chip">UNINEST</span>
+          <div>
+            <h1>Student Allocation Queue</h1>
+            <p>Review assigned students and pending applicants.</p>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-link" data-page="dashboard" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-page="rooms" href="rooms.html">Rooms</a>
+          <a class="nav-link" data-page="students" href="students.html">Students</a>
+          <a class="nav-link" data-page="allocate" href="allocate.html">Allocate</a>
+          <a class="nav-link" data-page="reports" href="reports.html">Reports</a>
+        </nav>
+      </header>
+
+      <section class="grid" style="grid-template-columns: 1.1fr 1fr">
+        <article class="card">
+          <h2>Pending Requests</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Year</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>ST-802</td><td>Rhea Mercer</td><td>1st</td><td><span class="badge danger">Medical</span></td></tr>
+                <tr><td>ST-691</td><td>Harish Menon</td><td>2nd</td><td><span class="badge warn">Sports</span></td></tr>
+                <tr><td>ST-713</td><td>Yusuf Shah</td><td>1st</td><td><span class="badge ok">General</span></td></tr>
+                <tr><td>ST-724</td><td>Lina Devi</td><td>3rd</td><td><span class="badge ok">General</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Assigned Today</h2>
+          <p><span class="badge ok">6 students</span> assigned in the last 24 hours.</p>
+          <div class="timeline">
+            <div class="timeline-item">
+              <strong>ST-600 / Ronit Paul</strong>
+              <p>Allocated to C-116, Bed 2 at 09:14</p>
+            </div>
+            <div class="timeline-item">
+              <strong>ST-512 / Kezia Mathew</strong>
+              <p>Allocated to A-102, Bed 3 at 11:23</p>
+            </div>
+            <div class="timeline-item">
+              <strong>ST-444 / Ben Chhetri</strong>
+              <p>Allocated to C-110, Bed 1 at 14:07</p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

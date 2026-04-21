@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Allocate Room</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="allocate">
+    <main class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-chip">UNINEST</span>
+          <div>
+            <h1>Allocate Room</h1>
+            <p>Create a new room allocation entry and track it instantly.</p>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-link" data-page="dashboard" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-page="rooms" href="rooms.html">Rooms</a>
+          <a class="nav-link" data-page="students" href="students.html">Students</a>
+          <a class="nav-link" data-page="allocate" href="allocate.html">Allocate</a>
+          <a class="nav-link" data-page="reports" href="reports.html">Reports</a>
+        </nav>
+      </header>
+
+      <section class="card">
+        <h2>Allocation Form</h2>
+        <form id="allocation-form">
+          <div class="form-grid">
+            <label>
+              Student ID
+              <input type="text" name="studentId" placeholder="ST-000" required />
+            </label>
+            <label>
+              Student Name
+              <input type="text" name="studentName" placeholder="Full name" required />
+            </label>
+            <label>
+              Room Number
+              <select name="roomNumber" required>
+                <option value="">Choose room</option>
+                <option>A102</option>
+                <option>B208</option>
+                <option>C116</option>
+                <option>D312</option>
+              </select>
+            </label>
+            <label>
+              Bed Number
+              <select name="bed" required>
+                <option value="">Choose bed</option>
+                <option>Bed 1</option>
+                <option>Bed 2</option>
+                <option>Bed 3</option>
+                <option>Bed 4</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Allocation Reason
+            <textarea name="reason" rows="3" placeholder="Medical, seniority, transfer, etc."></textarea>
+          </label>
+
+          <button type="submit">Save Allocation</button>
+          <p id="form-message" class="metric-note"></p>
+        </form>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

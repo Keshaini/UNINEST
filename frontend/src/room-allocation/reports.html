@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Allocation Reports</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="reports">
+    <main class="page-shell">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-chip">UNINEST</span>
+          <div>
+            <h1>Reports & Trends</h1>
+            <p>Observe occupancy pressure and waitlist movement by block.</p>
+          </div>
+        </div>
+        <nav>
+          <a class="nav-link" data-page="dashboard" href="dashboard.html">Dashboard</a>
+          <a class="nav-link" data-page="rooms" href="rooms.html">Rooms</a>
+          <a class="nav-link" data-page="students" href="students.html">Students</a>
+          <a class="nav-link" data-page="allocate" href="allocate.html">Allocate</a>
+          <a class="nav-link" data-page="reports" href="reports.html">Reports</a>
+        </nav>
+      </header>
+
+      <section class="grid cards">
+        <article class="card">
+          <h3>Avg. Allocation Time</h3>
+          <p class="metric">2.4 days</p>
+          <p class="metric-note">Improved from 3.1 days this month</p>
+        </article>
+        <article class="card">
+          <h3>Waitlist Change</h3>
+          <p class="metric">-18%</p>
+          <p class="metric-note">Compared to previous week</p>
+        </article>
+        <article class="card">
+          <h3>Reallocation Rate</h3>
+          <p class="metric">6.2%</p>
+          <p class="metric-note">Transfers and room swaps</p>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top: 14px">
+        <h2>Block-wise Occupancy</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Capacity</th>
+                <th>Occupied</th>
+                <th>Vacant</th>
+                <th>Utilization</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A</td><td>160</td><td>125</td><td>35</td><td><span class="badge ok">78%</span></td></tr>
+              <tr><td>B</td><td>160</td><td>147</td><td>13</td><td><span class="badge warn">92%</span></td></tr>
+              <tr><td>C</td><td>160</td><td>102</td><td>58</td><td><span class="badge ok">64%</span></td></tr>
+              <tr><td>D</td><td>160</td><td>157</td><td>3</td><td><span class="badge danger">98%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
