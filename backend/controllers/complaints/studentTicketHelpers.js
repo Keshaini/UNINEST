@@ -7,6 +7,8 @@ const toTicketMessage = (ticketId, message) => ({
   senderRole: message.senderRole,
   senderName: message.senderName,
   message: message.message,
+  imageUrl: message.imageUrl || '',
+  imageName: message.imageName || '',
   sentAt: message.sentAt,
 });
 

@@ -1,7 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTicketChatSocket } from '../../../common/hooks/useTicketChatSocket';
 import { appendUniqueTicketMessage, sortTicketMessages, toClientError } from '../../../common/utils/ticketChatUtils';
 import { getSupportTicketDetails, getSupportTicketMessages, sendSupportTicketMessage } from '../../../services/complaintsService';
+
+const MAX_CHAT_IMAGE_SIZE = 5 * 1024 * 1024;
 
 export const useSupportTicketChat = ({ onAfterMessage }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,15 +12,46 @@ export const useSupportTicketChat = ({ onAfterMessage }) => {
   const [chatInput, setChatInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
   const [chatError, setChatError] = useState('');
+  const [chatImageFile, setChatImageFile] = useState(null);
+  const [chatImagePreview, setChatImagePreview] = useState('');
   const activeLoadRef = useRef(0);
 
   const sortedMessages = useMemo(() => sortTicketMessages(messages), [messages]);
+  const chatImageName = chatImageFile?.name || '';
+  const canSendSupportMessage = Boolean(chatInput.trim() || chatImageFile) && !chatSending;
+
+  const clearPendingChatImage = () => {
+    setChatImageFile(null);
+    setChatImagePreview('');
+  };
+
+  const handleChatImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setChatError('Please choose a valid image file.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_CHAT_IMAGE_SIZE) {
+      setChatError('Image must be 5MB or smaller.');
+      event.target.value = '';
+      return;
+    }
+
+    setChatImageFile(file);
+    setChatImagePreview(URL.createObjectURL(file));
+    setChatError('');
+  };
 
   const openChat = async (complaint) => {
     if (!complaint?._id) return;
     setChatError('');
     setChatInput('');
     setChatSending(false);
+    clearPendingChatImage();
     setTicket(complaint);
     setMessages(complaint.chatMessages || []);
     setIsOpen(true);
@@ -57,6 +90,7 @@ export const useSupportTicketChat = ({ onAfterMessage }) => {
     setChatInput('');
     setChatError('');
     setChatSending(false);
+    clearPendingChatImage();
   };
 
   const { sendSocketMessage, isSocketConnected } = useTicketChatSocket({
@@ -71,28 +105,38 @@ export const useSupportTicketChat = ({ onAfterMessage }) => {
   const sendSupportMessage = async (event) => {
     event.preventDefault();
     const message = chatInput.trim();
-    if (!message || !ticket?._id) return;
+    if ((!message && !chatImageFile) || !ticket?._id) return;
     setChatSending(true);
     try {
-      const messagePayload = {
-        senderName: ticket.assignedTo?.trim() || 'Support Team',
-        message,
-      };
-      const sentMessage = isSocketConnected
-        ? await sendSocketMessage(messagePayload)
-        : (await sendSupportTicketMessage(ticket._id, messagePayload)).data;
+      const senderName = ticket.assignedTo?.trim() || 'Support Team';
+      const formPayload = new FormData();
+      formPayload.append('senderName', senderName);
+      formPayload.append('message', message);
+      if (chatImageFile) formPayload.append('image', chatImageFile);
+
+      const sentMessage = chatImageFile
+        ? (await sendSupportTicketMessage(ticket._id, formPayload)).data
+        : isSocketConnected
+          ? await sendSocketMessage({ senderName, message })
+          : (await sendSupportTicketMessage(ticket._id, { senderName, message })).data;
       setMessages((previous) => appendUniqueTicketMessage(previous, sentMessage));
       setChatInput('');
+      clearPendingChatImage();
       setChatError('');
       await onAfterMessage?.();
     } catch (error) {
       try {
-        const fallbackResponse = await sendSupportTicketMessage(ticket._id, {
-          senderName: ticket.assignedTo?.trim() || 'Support Team',
-          message,
-        });
+        const fallbackPayload = chatImageFile ? new FormData() : { senderName: ticket.assignedTo?.trim() || 'Support Team', message };
+        if (chatImageFile) {
+          fallbackPayload.append('senderName', ticket.assignedTo?.trim() || 'Support Team');
+          fallbackPayload.append('message', message);
+          fallbackPayload.append('image', chatImageFile);
+        }
+
+        const fallbackResponse = await sendSupportTicketMessage(ticket._id, fallbackPayload);
         setMessages((previous) => appendUniqueTicketMessage(previous, fallbackResponse.data));
         setChatInput('');
+        clearPendingChatImage();
         setChatError('');
         await onAfterMessage?.();
       } catch (fallbackError) {
@@ -103,17 +147,29 @@ export const useSupportTicketChat = ({ onAfterMessage }) => {
     }
   };
 
+  useEffect(
+    () => () => {
+      if (chatImagePreview) URL.revokeObjectURL(chatImagePreview);
+    },
+    [chatImagePreview]
+  );
+
   return {
     isOpen,
     ticket,
     sortedMessages,
     chatInput,
     setChatInput,
+    chatImagePreview,
+    chatImageName,
     chatSending,
     chatError,
     isSocketConnected,
+    canSendSupportMessage,
     openChat,
     closeChat,
+    handleChatImageChange,
+    clearPendingChatImage,
     sendSupportMessage,
   };
 };

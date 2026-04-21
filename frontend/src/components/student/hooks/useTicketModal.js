@@ -3,6 +3,8 @@ import { useTicketChatSocket } from '../../../common/hooks/useTicketChatSocket';
 import { appendUniqueTicketMessage, sortTicketMessages, toClientError } from '../../../common/utils/ticketChatUtils';
 import { getStudentTicketDetails, getStudentTicketMessages, sendStudentTicketMessage } from '../../../services/complaintsService';
 
+const MAX_CHAT_IMAGE_SIZE = 5 * 1024 * 1024;
+
 export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackStudentName }) => {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState('');
@@ -12,8 +14,38 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
   const [ticketModalError, setTicketModalError] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
+  const [chatImageFile, setChatImageFile] = useState(null);
+  const [chatImagePreview, setChatImagePreview] = useState('');
   const activeLoadRef = useRef(0);
   const sortedMessages = useMemo(() => sortTicketMessages(ticketMessages), [ticketMessages]);
+  const chatImageName = chatImageFile?.name || '';
+  const canSendChatMessage = Boolean(chatInput.trim() || chatImageFile) && !chatSending;
+
+  const clearPendingChatImage = () => {
+    setChatImageFile(null);
+    setChatImagePreview('');
+  };
+
+  const handleChatImageChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setTicketModalError('Please choose a valid image file.');
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_CHAT_IMAGE_SIZE) {
+      setTicketModalError('Image must be 5MB or smaller.');
+      event.target.value = '';
+      return;
+    }
+
+    setChatImageFile(file);
+    setChatImagePreview(URL.createObjectURL(file));
+    setTicketModalError('');
+  };
 
   const closeTicketModal = () => {
     activeLoadRef.current += 1;
@@ -23,6 +55,7 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
     setTicketMessages([]);
     setChatInput('');
     setChatSending(false);
+    clearPendingChatImage();
     setTicketModalError('');
     setTicketModalLoading(false);
   };
@@ -60,6 +93,7 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
     setTicketMessages(ticket.chatMessages || []);
     setChatInput('');
     setChatSending(false);
+    clearPendingChatImage();
     setTicketModalError('');
     setIsTicketModalOpen(true);
     await loadTicketModalData(ticket._id, ticket);
@@ -77,28 +111,39 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
   const handleSendChatMessage = async (event) => {
     event.preventDefault();
     const message = chatInput.trim();
-    if (!message || !selectedTicketId || !currentStudentId) return;
+    if ((!message && !chatImageFile) || !selectedTicketId || !currentStudentId) return;
     setChatSending(true);
     try {
-      const messagePayload = {
-        senderName: fallbackStudentName?.trim() || currentStudentId,
-        message,
-      };
-      const sentMessage = isSocketConnected
-        ? await sendSocketMessage(messagePayload)
-        : (await sendStudentTicketMessage(selectedTicketId, currentStudentId, messagePayload)).data;
+      const shouldUploadImage = Boolean(chatImageFile);
+      const senderName = fallbackStudentName?.trim() || currentStudentId;
+      const formPayload = new FormData();
+      formPayload.append('senderName', senderName);
+      formPayload.append('message', message);
+      if (chatImageFile) formPayload.append('image', chatImageFile);
+
+      const sentMessage = shouldUploadImage
+        ? (await sendStudentTicketMessage(selectedTicketId, currentStudentId, formPayload)).data
+        : isSocketConnected
+          ? await sendSocketMessage({ senderName, message })
+          : (await sendStudentTicketMessage(selectedTicketId, currentStudentId, { senderName, message })).data;
       setTicketMessages((previous) => appendUniqueTicketMessage(previous, sentMessage));
       setChatInput('');
+      clearPendingChatImage();
       setTicketModalError('');
       await onLoadMyComplaints();
     } catch (error) {
       try {
-        const fallbackResponse = await sendStudentTicketMessage(selectedTicketId, currentStudentId, {
-          senderName: fallbackStudentName?.trim() || currentStudentId,
-          message,
-        });
+        const fallbackPayload = chatImageFile ? new FormData() : { senderName: fallbackStudentName?.trim() || currentStudentId, message };
+        if (chatImageFile) {
+          fallbackPayload.append('senderName', fallbackStudentName?.trim() || currentStudentId);
+          fallbackPayload.append('message', message);
+          fallbackPayload.append('image', chatImageFile);
+        }
+
+        const fallbackResponse = await sendStudentTicketMessage(selectedTicketId, currentStudentId, fallbackPayload);
         setTicketMessages((previous) => appendUniqueTicketMessage(previous, fallbackResponse.data));
         setChatInput('');
+        clearPendingChatImage();
         setTicketModalError('');
         await onLoadMyComplaints();
       } catch (fallbackError) {
@@ -108,6 +153,13 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
       setChatSending(false);
     }
   };
+
+  useEffect(
+    () => () => {
+      if (chatImagePreview) URL.revokeObjectURL(chatImagePreview);
+    },
+    [chatImagePreview]
+  );
 
   useEffect(() => {
     if (!isTicketModalOpen) return undefined;
@@ -130,7 +182,12 @@ export const useTicketModal = ({ currentStudentId, onLoadMyComplaints, fallbackS
     isSocketConnected,
     chatInput,
     setChatInput,
+    chatImagePreview,
+    chatImageName,
+    canSendChatMessage,
     chatSending,
+    handleChatImageChange,
+    clearPendingChatImage,
     handleSendChatMessage,
     openTicketModal,
   };

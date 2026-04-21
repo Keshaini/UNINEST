@@ -10,10 +10,12 @@ const {
   sendStudentTicketMessage,
   getSupportTicketDetails,
   getSupportTicketMessages,
+  sendSupportTicketMessage,
   updateComplaint,
   deleteComplaint,
 } = require('../controllers/complaintController');
 const { protect, authorizeAdmin } = require('../middleware/authMiddleware');
+const { uploadComplaintChatImage } = require('../middleware/complaintChatUpload');
 
 const router = express.Router();
 
@@ -22,13 +24,14 @@ router.post('/student/submit', protect, createComplaint);
 router.get('/student/history/:studentId', protect, getComplaintsByStudent);
 router.get('/student/ticket/:id/full-view/:studentId', protect, getStudentTicketDetails);
 router.get('/student/ticket/:id/messages/:studentId', protect, getStudentTicketMessages);
-router.post('/student/ticket/:id/messages/:studentId/send', protect, sendStudentTicketMessage);
+router.post('/student/ticket/:id/messages/:studentId/send', protect, uploadComplaintChatImage, sendStudentTicketMessage);
 
 // Support complaint routes (admin protected routes)
 router.get('/support/all', protect, authorizeAdmin, getAllComplaints);
 router.get('/support/overview-stats', protect, authorizeAdmin, getComplaintStats);
 router.get('/support/ticket/:id/full-view', protect, authorizeAdmin, getSupportTicketDetails);
 router.get('/support/ticket/:id/messages', protect, authorizeAdmin, getSupportTicketMessages);
+router.post('/support/ticket/:id/messages/send', protect, authorizeAdmin, uploadComplaintChatImage, sendSupportTicketMessage);
 router.patch('/support/update/:id', protect, authorizeAdmin, updateComplaint);
 router.delete('/support/remove/:id', protect, authorizeAdmin, deleteComplaint);
 

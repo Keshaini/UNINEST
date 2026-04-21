@@ -31,6 +31,13 @@ const resolveComplaintsApiBaseUrl = () => {
 };
 
 const apiBaseUrl = resolveComplaintsApiBaseUrl();
+const complaintsAssetBaseUrl = (() => {
+  try {
+    return new URL(apiBaseUrl).origin;
+  } catch {
+    return 'http://localhost:5000';
+  }
+})();
 
 const complaintsApi = axios.create({
   baseURL: apiBaseUrl,
@@ -60,6 +67,23 @@ const requestWithFallback = async (primaryRequest, fallbackRequest) => {
     }
 
     return fallbackRequest();
+  }
+};
+
+const isFormDataPayload = (payload) => typeof FormData !== 'undefined' && payload instanceof FormData;
+
+const buildRequestConfig = (payload) => (isFormDataPayload(payload) ? { headers: { 'Content-Type': 'multipart/form-data' } } : {});
+
+export const resolveComplaintAssetUrl = (assetPath) => {
+  if (!assetPath) return '';
+  if (/^https?:\/\//i.test(assetPath) || assetPath.startsWith('data:') || assetPath.startsWith('blob:')) {
+    return assetPath;
+  }
+
+  try {
+    return new URL(assetPath, complaintsAssetBaseUrl).toString();
+  } catch {
+    return assetPath;
   }
 };
 
@@ -144,11 +168,15 @@ export const getSupportTicketMessages = async (ticketId) => {
 
 export const sendStudentTicketMessage = async (ticketId, studentId, payload) => {
   const encodedStudentId = encodeURIComponent(studentId);
-  const response = await complaintsApi.post(`/student/ticket/${ticketId}/messages/${encodedStudentId}/send`, payload);
+  const response = await complaintsApi.post(
+    `/student/ticket/${ticketId}/messages/${encodedStudentId}/send`,
+    payload,
+    buildRequestConfig(payload)
+  );
   return response.data;
 };
 
 export const sendSupportTicketMessage = async (ticketId, payload) => {
-  const response = await complaintsApi.post(`/support/ticket/${ticketId}/messages/send`, payload);
+  const response = await complaintsApi.post(`/support/ticket/${ticketId}/messages/send`, payload, buildRequestConfig(payload));
   return response.data;
 };

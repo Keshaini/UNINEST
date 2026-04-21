@@ -1,4 +1,4 @@
-const { getStudentTicket, toTicketMessage } = require('./studentTicketHelpers');
+const { getTicketById, toTicketMessage } = require('./studentTicketHelpers');
 const { normalizeString } = require('./utils');
 const {
   createChatMessage,
@@ -7,15 +7,15 @@ const {
   validateChatSubmission,
 } = require('./chatMessageHelpers');
 
-const sendStudentTicketMessage = async (req, res) => {
+const sendSupportTicketMessage = async (req, res) => {
   try {
-    const { complaint, error, status } = await getStudentTicket(req.params.id, req.params.studentId);
+    const { complaint, error, status } = await getTicketById(req.params.id);
     if (error) {
       await removeUploadedFile(req.file);
       return res.status(status).json({ success: false, message: error });
     }
 
-    const senderName = normalizeString(req.body.senderName);
+    const senderName = normalizeString(req.body.senderName) || complaint.assignedTo || 'Support Team';
     const { error: validationError, message } = validateChatSubmission({
       message: req.body.message,
       file: req.file,
@@ -27,7 +27,7 @@ const sendStudentTicketMessage = async (req, res) => {
 
     complaint.chatMessages.push(createChatMessage({
       complaint,
-      senderRole: 'student',
+      senderRole: 'support',
       senderName,
       message,
       file: req.file,
@@ -39,13 +39,13 @@ const sendStudentTicketMessage = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Message sent successfully.',
+      message: 'Support message sent successfully.',
       data: toTicketMessage(String(complaint._id), savedMessage),
     });
   } catch (error) {
     await removeUploadedFile(req.file);
-    return res.status(500).json({ success: false, message: 'Failed to send ticket message.', error: error.message });
+    return res.status(500).json({ success: false, message: 'Failed to send support message.', error: error.message });
   }
 };
 
-module.exports = sendStudentTicketMessage;
+module.exports = sendSupportTicketMessage;

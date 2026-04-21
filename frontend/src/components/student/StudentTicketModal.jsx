@@ -11,7 +11,12 @@ const StudentTicketModal = ({
   isSocketConnected,
   chatInput,
   setChatInput,
+  chatImagePreview,
+  chatImageName,
+  canSendChatMessage,
   chatSending,
+  handleChatImageChange,
+  clearPendingChatImage,
   handleSendChatMessage,
 }) => {
   if (!isTicketModalOpen) {
@@ -50,7 +55,12 @@ const StudentTicketModal = ({
               isSocketConnected={isSocketConnected}
               chatInput={chatInput}
               setChatInput={setChatInput}
+              chatImagePreview={chatImagePreview}
+              chatImageName={chatImageName}
+              canSendChatMessage={canSendChatMessage}
               chatSending={chatSending}
+              onImageChange={handleChatImageChange}
+              onRemoveImage={clearPendingChatImage}
               onSendMessage={handleSendChatMessage}
             />
           </div>

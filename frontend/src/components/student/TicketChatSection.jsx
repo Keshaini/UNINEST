@@ -1,8 +1,30 @@
+import { ImagePlus, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { formatDateTime } from '../../common/utils/formatDateTime';
+import { resolveComplaintAssetUrl } from '../../services/complaintsService';
 
-const TicketChatSection = ({ sortedMessages, isSocketConnected, chatInput, setChatInput, chatSending, onSendMessage }) => {
+const TicketChatSection = ({
+  sortedMessages,
+  isSocketConnected,
+  chatInput,
+  setChatInput,
+  chatImagePreview,
+  chatImageName,
+  canSendChatMessage,
+  chatSending,
+  onImageChange,
+  onRemoveImage,
+  onSendMessage,
+}) => {
+  const imageInputRef = useRef(null);
   const messageCount = sortedMessages.length;
   const latestMessage = messageCount > 0 ? sortedMessages[messageCount - 1] : null;
+
+  useEffect(() => {
+    if (!chatImagePreview && imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+  }, [chatImagePreview]);
 
   return (
     <section className="ticket-chat-box">
@@ -35,13 +57,24 @@ const TicketChatSection = ({ sortedMessages, isSocketConnected, chatInput, setCh
         {sortedMessages.map((message) => (
           <article
             className={message.senderRole === 'student' ? 'chat-message student' : 'chat-message support'}
-            key={message._id || `${message.senderRole}-${message.sentAt}-${message.message}`}
+            key={message._id || `${message.senderRole}-${message.sentAt}-${message.message}-${message.imageUrl || ''}`}
           >
             <div className="chat-meta">
               <strong>{message.senderName || (message.senderRole === 'student' ? 'Student' : 'Support')}</strong>
               <span>{formatDateTime(message.sentAt)}</span>
             </div>
-            <p>{message.message}</p>
+            {message.imageUrl ? (
+              <a
+                className="chat-image-link"
+                href={resolveComplaintAssetUrl(message.imageUrl)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Open image sent by ${message.senderName || message.senderRole}`}
+              >
+                <img className="chat-image" src={resolveComplaintAssetUrl(message.imageUrl)} alt={message.imageName || 'Chat attachment'} />
+              </a>
+            ) : null}
+            {message.message ? <p>{message.message}</p> : null}
           </article>
         ))}
       </div>
@@ -57,15 +90,51 @@ const TicketChatSection = ({ sortedMessages, isSocketConnected, chatInput, setCh
           value={chatInput}
           onChange={(event) => setChatInput(event.target.value)}
           placeholder="Type your message to support service..."
-          required
         />
+
+        <div className="chat-attachment-row">
+          <input
+            ref={imageInputRef}
+            id="ticket-chat-image"
+            className="chat-file-input"
+            type="file"
+            accept="image/*"
+            onChange={onImageChange}
+          />
+          <label className="chat-upload-btn" htmlFor="ticket-chat-image">
+            <ImagePlus size={16} strokeWidth={2.2} aria-hidden="true" />
+            <span>Add Photo</span>
+          </label>
+          <span className="chat-upload-note">JPG, PNG, WEBP, or GIF up to 5MB.</span>
+        </div>
+
+        {chatImagePreview ? (
+          <div className="chat-upload-preview">
+            <img src={chatImagePreview} alt={chatImageName || 'Selected upload'} />
+            <div className="chat-upload-preview-copy">
+              <strong>{chatImageName || 'Selected image'}</strong>
+              <span>This photo will be sent with your next message.</span>
+            </div>
+            <button
+              className="chat-remove-upload"
+              type="button"
+              onClick={() => {
+                if (imageInputRef.current) imageInputRef.current.value = '';
+                onRemoveImage();
+              }}
+              aria-label="Remove selected chat image"
+            >
+              <X size={16} strokeWidth={2.2} aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
 
         <div className="chat-form-footer">
           <span className="chat-helper-text">Keep it short and include actionable details.</span>
           <span className="chat-char-count">{chatInput.length}/600</span>
         </div>
 
-        <button className="primary-btn send-chat-btn" type="submit" disabled={chatSending}>
+        <button className="primary-btn send-chat-btn" type="submit" disabled={!canSendChatMessage}>
           <span className="send-chat-icon" aria-hidden="true">
             <svg viewBox="0 0 20 20" focusable="false">
               <path d="M3 10.5L17 3.5L12.2 16.5L10 11.9L3 10.5Z" />

@@ -1,5 +1,8 @@
+import { ImagePlus, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { formatDateTime } from '../../common/utils/formatDateTime';
 import { PRIORITY_LABEL, STATUS_LABEL } from '../../data/complaintData';
+import { resolveComplaintAssetUrl } from '../../services/complaintsService';
 
 const SupportChatModal = ({
   isOpen,
@@ -7,19 +10,31 @@ const SupportChatModal = ({
   sortedMessages,
   chatInput,
   setChatInput,
+  chatImagePreview,
+  chatImageName,
   chatSending,
   chatError,
   isSocketConnected,
+  canSendSupportMessage,
+  handleChatImageChange,
+  clearPendingChatImage,
   onClose,
   onSendMessage,
 }) => {
-  if (!isOpen || !ticket) return null;
+  const imageInputRef = useRef(null);
   const messageCount = sortedMessages.length;
   const latestMessage = messageCount > 0 ? sortedMessages[messageCount - 1] : null;
-  const ticketCode = ticket._id ? `#${String(ticket._id).slice(-6).toUpperCase()}` : '#N/A';
-  const canSend = chatInput.trim().length > 0 && !chatSending;
-  const statusLabel = STATUS_LABEL[ticket.status] || ticket.status || 'Pending';
-  const priorityLabel = PRIORITY_LABEL[ticket.priority] || ticket.priority || 'Medium';
+  const ticketCode = ticket?._id ? `#${String(ticket._id).slice(-6).toUpperCase()}` : '#N/A';
+  const statusLabel = STATUS_LABEL[ticket?.status] || ticket?.status || 'Pending';
+  const priorityLabel = PRIORITY_LABEL[ticket?.priority] || ticket?.priority || 'Medium';
+
+  useEffect(() => {
+    if (!chatImagePreview && imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+  }, [chatImagePreview]);
+
+  if (!isOpen || !ticket) return null;
 
   return (
     <div className="support-chat-overlay" role="presentation" onClick={(event) => event.target === event.currentTarget && onClose()}>
@@ -77,7 +92,7 @@ const SupportChatModal = ({
             </div>
           ) : null}
           {sortedMessages.map((message) => (
-            <article className={`support-chat-item ${message.senderRole}`} key={message._id || `${message.sentAt}-${message.message}`}>
+            <article className={`support-chat-item ${message.senderRole}`} key={message._id || `${message.sentAt}-${message.message}-${message.imageUrl || ''}`}>
               <span className="support-chat-avatar" aria-hidden="true">
                 {(message.senderRole === 'support' ? 'S' : 'U').toUpperCase()}
               </span>
@@ -86,7 +101,18 @@ const SupportChatModal = ({
                   <strong>{message.senderName || (message.senderRole === 'support' ? 'Support Team' : 'Student')}</strong>
                   <span>{formatDateTime(message.sentAt)}</span>
                 </div>
-                <p>{message.message}</p>
+                {message.imageUrl ? (
+                  <a
+                    className="chat-image-link"
+                    href={resolveComplaintAssetUrl(message.imageUrl)}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`Open image sent by ${message.senderName || message.senderRole}`}
+                  >
+                    <img className="chat-image" src={resolveComplaintAssetUrl(message.imageUrl)} alt={message.imageName || 'Chat attachment'} />
+                  </a>
+                ) : null}
+                {message.message ? <p>{message.message}</p> : null}
               </div>
             </article>
           ))}
@@ -101,13 +127,47 @@ const SupportChatModal = ({
             value={chatInput}
             onChange={(event) => setChatInput(event.target.value)}
             placeholder="Type a clear update, next action, or request for more details..."
-            required
           />
+          <div className="chat-attachment-row">
+            <input
+              ref={imageInputRef}
+              id="support-chat-image"
+              className="chat-file-input"
+              type="file"
+              accept="image/*"
+              onChange={handleChatImageChange}
+            />
+            <label className="chat-upload-btn" htmlFor="support-chat-image">
+              <ImagePlus size={16} strokeWidth={2.2} aria-hidden="true" />
+              <span>Add Photo</span>
+            </label>
+            <span className="chat-upload-note">JPG, PNG, WEBP, or GIF up to 5MB.</span>
+          </div>
+          {chatImagePreview ? (
+            <div className="chat-upload-preview">
+              <img src={chatImagePreview} alt={chatImageName || 'Selected upload'} />
+              <div className="chat-upload-preview-copy">
+                <strong>{chatImageName || 'Selected image'}</strong>
+                <span>This photo will be sent with your next reply.</span>
+              </div>
+              <button
+                className="chat-remove-upload"
+                type="button"
+                onClick={() => {
+                  if (imageInputRef.current) imageInputRef.current.value = '';
+                  clearPendingChatImage();
+                }}
+                aria-label="Remove selected chat image"
+              >
+                <X size={16} strokeWidth={2.2} aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
           <div className="chat-form-footer">
             <span className="chat-helper-text">Keep it short, specific, and actionable.</span>
             <span className="chat-char-count">{chatInput.length}/600</span>
           </div>
-          <button className="primary-btn support-chat-send" type="submit" disabled={!canSend}>
+          <button className="primary-btn support-chat-send" type="submit" disabled={!canSendSupportMessage}>
             <span className="send-icon" aria-hidden="true">
               <svg viewBox="0 0 20 20" focusable="false">
                 <path d="M3 10.5L17 3.5L12.2 16.5L10 11.9L3 10.5Z" />
