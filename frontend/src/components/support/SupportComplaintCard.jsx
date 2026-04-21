@@ -1,5 +1,6 @@
 import { formatDateTime } from '../../common/utils/formatDateTime';
 import { PRIORITY_LABEL, STATUS_LABEL } from '../../data/complaintData';
+import { resolveComplaintAssetUrl } from '../../services/complaintsService';
 
 const updateDraft = (setComplaintDrafts, complaintId, draft, key) => (event) =>
   setComplaintDrafts((previous) => ({ ...previous, [complaintId]: { ...draft, [key]: event.target.value } }));
@@ -13,8 +14,13 @@ const SupportComplaintCard = ({
   onSaveComplaint,
   onDeleteComplaint,
   onOpenChat,
-}) => (
-  <article className="complaint-card support-card">
+}) => {
+  const evidenceImages = Array.isArray(complaint.evidenceImages)
+    ? complaint.evidenceImages.filter((item) => item?.url)
+    : [];
+
+  return (
+    <article className="complaint-card support-card">
     <div className="complaint-head">
       <div>
         <h3>{complaint.title}</h3>
@@ -29,6 +35,27 @@ const SupportComplaintCard = ({
     </div>
 
     <p>{complaint.description}</p>
+
+    {evidenceImages.length > 0 ? (
+      <div className="complaint-evidence-block">
+        <p className="complaint-evidence-title">Evidence ({evidenceImages.length})</p>
+        <div className="complaint-evidence-grid">
+          {evidenceImages.map((image, index) => (
+            <a
+              className="complaint-evidence-item"
+              href={resolveComplaintAssetUrl(image.url)}
+              key={`${image.url}-${index}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Open evidence image ${index + 1}`}
+            >
+              <img src={resolveComplaintAssetUrl(image.url)} alt={image.name || `Evidence image ${index + 1}`} />
+              <span>{image.name || `Evidence ${index + 1}`}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    ) : null}
 
     <div className="split-row support-edit-grid">
       <div className="form-row">
@@ -80,6 +107,7 @@ const SupportComplaintCard = ({
       <span>Resolved at: {formatDateTime(complaint.resolvedAt)}</span>
     </div>
   </article>
-);
+  );
+};
 
 export default SupportComplaintCard;

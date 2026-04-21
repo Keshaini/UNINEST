@@ -15,12 +15,13 @@ const {
   deleteComplaint,
 } = require('../controllers/complaintController');
 const { protect, authorizeAdmin } = require('../middleware/authMiddleware');
+const { uploadComplaintEvidenceImages } = require('../middleware/complaintEvidenceUpload');
 const { uploadComplaintChatImage } = require('../middleware/complaintChatUpload');
 
 const router = express.Router();
 
 // Student complaint routes (protected routes for students)
-router.post('/student/submit', protect, createComplaint);
+router.post('/student/submit', protect, uploadComplaintEvidenceImages, createComplaint);
 router.get('/student/history/:studentId', protect, getComplaintsByStudent);
 router.get('/student/ticket/:id/full-view/:studentId', protect, getStudentTicketDetails);
 router.get('/student/ticket/:id/messages/:studentId', protect, getStudentTicketMessages);

@@ -33,6 +33,60 @@
   line-height: 1.5;
 }
 
+.support-panel .complaint-evidence-block {
+  margin-top: 0.72rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.support-panel .complaint-evidence-title {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.support-panel .complaint-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.52rem;
+}
+
+.support-panel .complaint-evidence-item {
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 0.92rem;
+  background: rgba(15, 23, 42, 0.74);
+  overflow: hidden;
+  display: grid;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
+}
+
+.support-panel .complaint-evidence-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(129, 140, 248, 0.48);
+  box-shadow: 0 14px 24px rgba(2, 6, 23, 0.2);
+}
+
+.support-panel .complaint-evidence-item img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  background: rgba(2, 6, 23, 0.45);
+}
+
+.support-panel .complaint-evidence-item span {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.5rem 0.56rem 0.58rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .support-panel .complaint-head {
   display: flex;
   flex-wrap: wrap;
@@ -86,4 +140,14 @@
   gap: 0.24rem;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+@media (max-width: 700px) {
+  .support-panel .complaint-evidence-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-panel .complaint-evidence-item img {
+    height: 160px;
+  }
 }

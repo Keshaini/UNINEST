@@ -468,6 +468,117 @@
   color: #fda4af;
 }
 
+.student-form-shell .form-row-evidence {
+  grid-column: 1 / -1;
+  gap: 0.62rem;
+}
+
+.student-form-shell .evidence-file-input {
+  display: none;
+}
+
+.student-form-shell .evidence-upload-btn {
+  width: fit-content;
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.12);
+  color: #c7d2fe;
+  padding: 0.55rem 0.92rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, transform 120ms ease;
+}
+
+.student-form-shell .evidence-upload-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(129, 140, 248, 0.48);
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.student-form-shell .evidence-upload-btn:disabled {
+  opacity: 0.64;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.student-form-shell .evidence-meta-row {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.student-form-shell .evidence-limit-note {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.student-form-shell .evidence-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.58rem;
+}
+
+.student-form-shell .evidence-preview-card {
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 1.02rem;
+  background: rgba(15, 23, 42, 0.72);
+  overflow: hidden;
+  display: grid;
+}
+
+.student-form-shell .evidence-preview-card img {
+  width: 100%;
+  height: 118px;
+  object-fit: cover;
+  background: rgba(2, 6, 23, 0.45);
+}
+
+.student-form-shell .evidence-preview-copy {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.55rem 0.6rem;
+}
+
+.student-form-shell .evidence-preview-copy strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-form-shell .evidence-preview-copy span {
+  color: var(--muted-strong);
+  font-size: 0.74rem;
+}
+
+.student-form-shell .evidence-remove-btn {
+  justify-self: end;
+  margin: 0 0.55rem 0.55rem 0;
+  width: 1.95rem;
+  height: 1.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(51, 65, 85, 0.82);
+  background: rgba(15, 23, 42, 0.78);
+  color: var(--ink-soft);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
+}
+
+.student-form-shell .evidence-remove-btn:hover {
+  border-color: rgba(244, 63, 94, 0.42);
+  background: rgba(127, 29, 29, 0.24);
+  color: #fda4af;
+}
+
 .student-form-shell .form-grid {
   display: grid;
   gap: 0.92rem;
@@ -704,6 +815,19 @@
   .student-form-shell .field-meta {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .student-form-shell .evidence-upload-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .student-form-shell .evidence-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-form-shell .evidence-preview-card img {
+    height: 165px;
   }
 
   .student-form-shell .form-submit-bar {

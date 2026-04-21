@@ -88,9 +88,10 @@ export const resolveComplaintAssetUrl = (assetPath) => {
 };
 
 export const createComplaint = async (payload) => {
+  const config = buildRequestConfig(payload);
   const response = await requestWithFallback(
-    () => complaintsApi.post('/student/submit', payload),
-    () => complaintsApi.post('/', payload)
+    () => complaintsApi.post('/student/submit', payload, config),
+    () => complaintsApi.post('/', payload, config)
   );
   return response.data;
 };

@@ -11,6 +11,7 @@ export const INITIAL_FORM = {
   description: '',
   category: 'general',
   priority: 'medium',
+  evidenceImages: [],
 };
 
 export const STATUS_LABEL = {

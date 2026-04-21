@@ -9,6 +9,20 @@ import { createComplaint, deleteComplaint, updateComplaint } from '../../service
 
 const getErrorMessage = (error, fallback) => error?.response?.data?.message || fallback;
 
+const buildComplaintPayload = (normalizedForm, evidenceImages = []) => {
+  const canCheckFile = typeof File !== 'undefined';
+  const attachments = Array.isArray(evidenceImages)
+    ? evidenceImages.filter((item) => (canCheckFile ? item?.file instanceof File : Boolean(item?.file)))
+    : [];
+
+  if (attachments.length === 0) return normalizedForm;
+
+  const payload = new FormData();
+  Object.entries(normalizedForm).forEach(([key, value]) => payload.append(key, value));
+  attachments.forEach((item) => payload.append('evidenceImages', item.file));
+  return payload;
+};
+
 export const useComplaintActions = ({
   formData,
   setFormData,
@@ -39,7 +53,8 @@ export const useComplaintActions = ({
           return setFeedback({ type: 'error', message: 'You can only submit tickets for your own account.' });
         }
 
-        await createComplaint(normalizedForm);
+        const payload = buildComplaintPayload(normalizedForm, formData.evidenceImages);
+        await createComplaint(payload);
         setCurrentStudentId(submittedStudentId);
         setFormData({
           ...INITIAL_FORM,
