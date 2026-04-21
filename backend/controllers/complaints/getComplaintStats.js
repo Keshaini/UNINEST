@@ -3,7 +3,11 @@ const { VALID_PRIORITIES, VALID_STATUSES } = require('./constants');
 
 const getComplaintStats = async (_req, res) => {
   try {
-    const [totalComplaints, openComplaints, resolvedComplaints, rejectedComplaints, statusCounts, priorityCounts, resolvedToday] =
+    const now = Date.now();
+    const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000);
+    const startOfToday = new Date(new Date(now).setHours(0, 0, 0, 0));
+
+    const [totalComplaints, openComplaints, resolvedComplaints, rejectedComplaints, statusCounts, priorityCounts, resolvedToday, newComplaints] =
       await Promise.all([
         Complaint.countDocuments(),
         Complaint.countDocuments({ status: { $in: ['pending', 'in_progress'] } }),
@@ -11,7 +15,8 @@ const getComplaintStats = async (_req, res) => {
         Complaint.countDocuments({ status: 'rejected' }),
         Complaint.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
         Complaint.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
-        Complaint.countDocuments({ status: 'resolved', resolvedAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } }),
+        Complaint.countDocuments({ status: 'resolved', resolvedAt: { $gte: startOfToday } }),
+        Complaint.countDocuments({ createdAt: { $gte: oneDayAgo } }),
       ]);
 
     const byStatus = VALID_STATUSES.reduce((acc, status) => ({ ...acc, [status]: 0 }), {});
@@ -22,7 +27,7 @@ const getComplaintStats = async (_req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: { totalComplaints, openComplaints, resolvedComplaints, rejectedComplaints, resolvedToday, byStatus, byPriority },
+      data: { totalComplaints, openComplaints, resolvedComplaints, rejectedComplaints, resolvedToday, newComplaints, byStatus, byPriority },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to fetch complaint statistics.', error: error.message });

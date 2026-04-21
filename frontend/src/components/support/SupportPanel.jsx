@@ -1,5 +1,4 @@
 import {
-  CATEGORY_OPTIONS,
   PRIORITY_OPTIONS,
   STATUS_OPTIONS,
 } from '../../data/complaintData';
@@ -37,11 +36,10 @@ const SupportPanel = ({
           <p>Filter, assign, and resolve complaints in one place.</p>
         </header>
         <SupportFiltersBar
+          stats={stats}
           supportFilters={supportFilters}
           setSupportFilters={setSupportFilters}
           statusOptions={STATUS_OPTIONS}
-          priorityOptions={PRIORITY_OPTIONS}
-          categoryOptions={CATEGORY_OPTIONS}
           supportLoading={supportLoading}
           onRefresh={onRefresh}
         />

@@ -6,7 +6,7 @@ import { useStudentComplaints } from './complaints/useStudentComplaints';
 import { useSupportDashboard } from './complaints/useSupportDashboard';
 import { getStoredStudentId } from './complaints/studentStorage';
 
-const initialFilters = { status: '', priority: '', category: '', search: '' };
+const initialFilters = { status: '', priority: '', category: '', search: '', newOnly: false };
 
 export const useComplaintModule = (isSupportRoute) => {
   const storedIdentity = getStoredStudentIdentity();
@@ -34,7 +34,7 @@ export const useComplaintModule = (isSupportRoute) => {
   });
 
   const hasFilters = useMemo(
-    () => Boolean(supportFilters.status || supportFilters.priority || supportFilters.category || supportFilters.search),
+    () => Boolean(supportFilters.status || supportFilters.priority || supportFilters.category || supportFilters.search || supportFilters.newOnly),
     [supportFilters]
   );
 

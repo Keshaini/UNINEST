@@ -43,10 +43,77 @@
 }
 
 .support-panel .filters-grid {
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   display: grid;
   gap: 0.7rem;
   grid-template-columns: minmax(0, 1fr);
+}
+
+.support-panel .status-timeline {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.support-panel .status-timeline-tab {
+  border: 1px solid rgba(71, 85, 105, 0.82);
+  background: rgba(15, 23, 42, 0.78);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 0.45rem 0.78rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    transform 120ms ease,
+    box-shadow 140ms ease;
+}
+
+.support-panel .status-timeline-tab:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(30, 41, 59, 0.88);
+}
+
+.support-panel .status-timeline-tab:active {
+  transform: translateY(1px);
+}
+
+.support-panel .status-timeline-tab:focus-visible {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.82);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.16);
+}
+
+.support-panel .status-timeline-tab.active {
+  border-color: rgba(99, 102, 241, 0.58);
+  background: linear-gradient(135deg, rgba(67, 56, 202, 0.4), rgba(99, 102, 241, 0.26));
+  color: #eef2ff;
+  box-shadow: 0 12px 24px rgba(79, 70, 229, 0.18);
+}
+
+.support-panel .timeline-count {
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: inherit;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.support-panel .status-timeline-tab.active .timeline-count {
+  background: rgba(238, 242, 255, 0.16);
 }
 
 .support-panel .form-row {
@@ -149,7 +216,14 @@
 
 @media (min-width: 768px) {
   .support-panel .split-row { grid-template-columns: 1fr 1fr; }
-  .support-panel .filters-grid { grid-template-columns: 2fr repeat(3, 1fr) auto; }
+  .support-panel .filters-grid { grid-template-columns: minmax(0, 1fr) auto; }
+}
+
+@media (max-width: 900px) {
+  .support-panel .status-timeline-tab {
+    flex: 1 1 calc(50% - 0.55rem);
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 899px) {

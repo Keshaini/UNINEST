@@ -1,6 +1,12 @@
 const { VALID_CATEGORIES, VALID_PRIORITIES, VALID_STATUSES } = require('./constants');
 const { normalizeEnum, normalizeString, toRegex } = require('./utils');
 
+const toBoolean = (value) => {
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === 'true' || normalized === '1' || normalized === 'yes';
+};
+
 const buildComplaintFilter = (query) => {
   const filter = {};
 
@@ -29,6 +35,11 @@ const buildComplaintFilter = (query) => {
   if (search) {
     const regex = toRegex(search);
     filter.$or = [{ title: regex }, { description: regex }, { studentName: regex }, { roomNumber: regex }];
+  }
+
+  if (query.newOnly !== undefined && toBoolean(query.newOnly)) {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    filter.createdAt = { $gte: oneDayAgo };
   }
 
   return { filter };

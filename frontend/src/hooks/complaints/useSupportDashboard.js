@@ -23,6 +23,7 @@ const buildParams = (page, filters) => ({
   ...(filters.priority ? { priority: filters.priority } : {}),
   ...(filters.category ? { category: filters.category } : {}),
   ...(filters.search ? { search: filters.search } : {}),
+  ...(filters.newOnly ? { newOnly: 'true' } : {}),
 });
 
 export const useSupportDashboard = ({ isSupportRoute, supportFilters, setFeedback }) => {

@@ -122,9 +122,37 @@
 .support-panel .priority-medium { background: rgba(99, 102, 241, 0.14); color: #c7d2fe; }
 .support-panel .priority-high { background: rgba(245, 158, 11, 0.14); color: #fcd34d; }
 .support-panel .priority-urgent { background: rgba(244, 63, 94, 0.14); color: #fda4af; }
+.support-panel .new-ticket { background: rgba(34, 197, 94, 0.16); color: #86efac; }
+
+.support-panel .support-card-description.compact {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 .support-panel .support-edit-grid {
   margin-top: 0.7rem;
+}
+
+.support-panel .support-card-toolbar {
+  margin-top: 0.72rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.support-panel .support-card-toolbar .secondary-btn {
+  min-height: 40px;
+}
+
+.support-panel .support-card-expand {
+  width: auto;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .support-panel .action-row {
@@ -143,6 +171,12 @@
 }
 
 @media (max-width: 700px) {
+  .support-panel .support-card-toolbar .secondary-btn,
+  .support-panel .support-card-expand {
+    width: 100%;
+    justify-content: center;
+  }
+
   .support-panel .complaint-evidence-grid {
     grid-template-columns: 1fr;
   }
