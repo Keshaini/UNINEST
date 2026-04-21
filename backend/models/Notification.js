@@ -7,16 +7,8 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: [
-      'payment_reminder',
-      'payment_success',
-      'payment_failed',
-      'invoice_generated',
-      'overdue_warning',
-      'refund_approved',
-      'refund_rejected'
-    ],
-    required: true
+    required: true,
+    enum: ['invoice_generated', 'payment_received', 'payment_reminder', 'overdue_warning', 'general', 'maintenance', 'announcement']
   },
   title: {
     type: String,
@@ -26,22 +18,26 @@ const notificationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  read: {
-    type: Boolean,
-    default: false
+  link: {
+    type: String
   },
-  link: String, // URL to related page
-  data: mongoose.Schema.Types.Mixed, // Additional data
   priority: {
     type: String,
     enum: ['low', 'medium', 'high'],
     default: 'medium'
+  },
+  read: {
+    type: Boolean,
+    default: false
+  },
+  readAt: {
+    type: Date
   }
 }, {
   timestamps: true
 });
 
 // Index for faster queries
-notificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
+notificationSchema.index({ userId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Notification', notificationSchema);

@@ -1,6 +1,5 @@
 const Student = require('../models/Student');
 const Allocation = require('../models/Allocation');
-const Payment = require('../models/Payment');
 const Complaint = require('../models/Complaint');
 
 exports.getAllStudents = async (req, res) => {
@@ -68,7 +67,6 @@ exports.deleteStudentPermanently = async (req, res) => {
         
         // Also delete related records to avoid orphans
         await Allocation.deleteMany({ studentId: req.params.id });
-        await Payment.deleteMany({ studentId: req.params.id });
         await Complaint.deleteMany({ studentId: req.params.id });
         
         await Student.findByIdAndDelete(req.params.id);
@@ -154,15 +152,6 @@ exports.getRoom = async (req, res) => {
         
         if (!allocation) return res.json({ assigned: false, status: 'No Room Assigned' });
         res.json({ assigned: true, ...allocation._doc });
-    } catch (err) {
-        res.status(500).json({ msg: 'Server Error: ' + err.message });
-    }
-};
-
-exports.getPayments = async (req, res) => {
-    try {
-        const payments = await Payment.find({ studentId: req.user.profileId }).sort({ createdAt: -1 });
-        res.json(payments);
     } catch (err) {
         res.status(500).json({ msg: 'Server Error: ' + err.message });
     }
