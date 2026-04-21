@@ -1,128 +1,109 @@
 const express = require('express');
-const router = express.Router();
 const Notification = require('../models/Notification');
-const authMiddleware = require('../middleware/auth');
+const Student = require('../models/Student');
+const { protect } = require('../middleware/authMiddleware');
 
-// Get user notifications
-router.get('/', authMiddleware, async (req, res) => {
+const router = express.Router();
+
+const resolveAudienceKeys = async (authUser = {}) => {
+  const keys = new Set();
+  if (authUser.id) keys.add(String(authUser.id));
+  if (authUser.profileId) keys.add(String(authUser.profileId));
+
+  if (authUser.role === 'Admin') {
+    keys.add('admin');
+    return Array.from(keys);
+  }
+
+  if (authUser.role === 'Student' && authUser.profileId) {
+    const student = await Student.findById(authUser.profileId).select('registrationNumber');
+    if (student?.registrationNumber) keys.add(student.registrationNumber);
+  }
+
+  return Array.from(keys);
+};
+
+const buildAudienceFilter = (audienceKeys) => ({ userId: { $in: audienceKeys } });
+
+router.get('/', protect, async (req, res) => {
   try {
     const { unreadOnly, limit = 20 } = req.query;
-    const userId = req.user.studentId;
+    const parsedLimit = Math.min(Math.max(Number.parseInt(limit, 10) || 20, 1), 100);
+    const audienceKeys = await resolveAudienceKeys(req.user || {});
 
-    const filter = { userId };
-    if (unreadOnly === 'true') {
-      filter.read = false;
-    }
+    const filter = buildAudienceFilter(audienceKeys);
+    if (unreadOnly === 'true') filter.read = false;
 
-    const notifications = await Notification.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit));
+    const notifications = await Notification.find(filter).sort({ createdAt: -1 }).limit(parsedLimit);
+    const unreadCount = await Notification.countDocuments({ ...buildAudienceFilter(audienceKeys), read: false });
 
-    const unreadCount = await Notification.countDocuments({
-      userId,
-      read: false
-    });
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: notifications.length,
       unreadCount,
-      data: notifications
+      data: notifications,
     });
-
   } catch (error) {
-    console.error('Error fetching notifications:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Failed to fetch notifications',
-      error: error.message
+      message: 'Failed to fetch notifications.',
+      error: error.message,
     });
   }
 });
 
-// Mark notification as read
-router.put('/:id/read', authMiddleware, async (req, res) => {
+router.put('/:id/read', protect, async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const notification = await Notification.findByIdAndUpdate(
-      id,
-      { read: true },
+    const audienceKeys = await resolveAudienceKeys(req.user || {});
+    const notification = await Notification.findOneAndUpdate(
+      { _id: req.params.id, ...buildAudienceFilter(audienceKeys) },
+      { read: true, readAt: new Date() },
       { new: true }
     );
 
     if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notification not found'
-      });
+      return res.status(404).json({ success: false, message: 'Notification not found.' });
     }
 
-    res.status(200).json({
-      success: true,
-      data: notification
-    });
-
+    return res.status(200).json({ success: true, data: notification });
   } catch (error) {
-    console.error('Error updating notification:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Failed to update notification',
-      error: error.message
+      message: 'Failed to update notification.',
+      error: error.message,
     });
   }
 });
 
-// Mark all as read
-router.put('/mark-all-read', authMiddleware, async (req, res) => {
+router.put('/mark-all-read', protect, async (req, res) => {
   try {
-    const userId = req.user.studentId;
-
-    await Notification.updateMany(
-      { userId, read: false },
-      { read: true }
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'All notifications marked as read'
-    });
-
+    const audienceKeys = await resolveAudienceKeys(req.user || {});
+    await Notification.updateMany({ ...buildAudienceFilter(audienceKeys), read: false }, { read: true, readAt: new Date() });
+    return res.status(200).json({ success: true, message: 'All notifications marked as read.' });
   } catch (error) {
-    console.error('Error marking notifications as read:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Failed to mark notifications as read',
-      error: error.message
+      message: 'Failed to mark notifications as read.',
+      error: error.message,
     });
   }
 });
 
-// Delete notification
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', protect, async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const notification = await Notification.findByIdAndDelete(id);
+    const audienceKeys = await resolveAudienceKeys(req.user || {});
+    const notification = await Notification.findOneAndDelete({ _id: req.params.id, ...buildAudienceFilter(audienceKeys) });
 
     if (!notification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Notification not found'
-      });
+      return res.status(404).json({ success: false, message: 'Notification not found.' });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Notification deleted successfully'
-    });
-
+    return res.status(200).json({ success: true, message: 'Notification deleted successfully.' });
   } catch (error) {
-    console.error('Error deleting notification:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Failed to delete notification',
-      error: error.message
+      message: 'Failed to delete notification.',
+      error: error.message,
     });
   }
 });

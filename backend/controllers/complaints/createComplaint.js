@@ -1,6 +1,7 @@
 const fs = require('fs');
 const Complaint = require('../../models/Complaint');
 const { VALID_CATEGORIES, VALID_PRIORITIES } = require('./constants');
+const { notifyAdminsAboutNewComplaint } = require('./notificationHelpers');
 const { normalizeEnum, normalizeString } = require('./utils');
 
 const toEvidenceImage = (file) => ({
@@ -72,6 +73,7 @@ const createComplaint = async (req, res) => {
     };
 
     const complaint = await Complaint.create(complaintData);
+    await notifyAdminsAboutNewComplaint(complaint).catch(() => {});
 
     return res.status(201).json({ success: true, message: 'Complaint created successfully.', data: complaint });
   } catch (error) {

@@ -1,5 +1,6 @@
 const { Server } = require('socket.io');
 const registerChatHandlers = require('./registerChatHandlers');
+const registerNotificationHandlers = require('./registerNotificationHandlers');
 const { setIo } = require('./socketStore');
 
 const createSocketServer = (httpServer, allowedOrigins = ['*']) => {
@@ -12,6 +13,7 @@ const createSocketServer = (httpServer, allowedOrigins = ['*']) => {
 
   io.on('connection', (socket) => {
     registerChatHandlers(io, socket);
+    registerNotificationHandlers(io, socket);
   });
 
   setIo(io);

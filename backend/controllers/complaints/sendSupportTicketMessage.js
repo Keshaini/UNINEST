@@ -1,4 +1,5 @@
 const { getTicketById, toTicketMessage } = require('./studentTicketHelpers');
+const { notifyStudentAboutSupportMessage } = require('./notificationHelpers');
 const { normalizeString } = require('./utils');
 const {
   createChatMessage,
@@ -36,6 +37,7 @@ const sendSupportTicketMessage = async (req, res) => {
     await complaint.save();
     const savedMessage = complaint.chatMessages[complaint.chatMessages.length - 1];
     emitTicketMessage(String(complaint._id), savedMessage);
+    await notifyStudentAboutSupportMessage(complaint, savedMessage).catch(() => {});
 
     return res.status(201).json({
       success: true,

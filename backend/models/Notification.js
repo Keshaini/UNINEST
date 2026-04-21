@@ -8,7 +8,8 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['invoice_generated', 'payment_received', 'payment_reminder', 'overdue_warning', 'general', 'maintenance', 'announcement']
+    trim: true,
+    maxlength: 100
   },
   title: {
     type: String,

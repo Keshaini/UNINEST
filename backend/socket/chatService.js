@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Complaint = require('../models/Complaint');
+const { notifyStudentAboutSupportMessage } = require('../controllers/complaints/notificationHelpers');
 
 const normalizeString = (value) => (typeof value === 'string' ? value.trim() : '');
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(normalizeString(value));
@@ -53,7 +54,11 @@ const appendMessage = async ({ complaint, ticketId, participantRole, senderName,
   });
 
   await complaint.save();
-  return toClientMessage(ticketId, complaint.chatMessages[complaint.chatMessages.length - 1]);
+  const savedMessage = complaint.chatMessages[complaint.chatMessages.length - 1];
+  if (participantRole === 'support') {
+    await notifyStudentAboutSupportMessage(complaint, savedMessage).catch(() => {});
+  }
+  return toClientMessage(ticketId, savedMessage);
 };
 
 module.exports = {

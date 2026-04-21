@@ -1,5 +1,6 @@
 const Complaint = require('../../models/Complaint');
 const { isValidObjectId, normalizeString } = require('./utils');
+const { notifyStudentAboutComplaintUpdate } = require('./notificationHelpers');
 const { applyComplaintUpdates, buildUpdatePayload } = require('./updateHelpers');
 
 const updateComplaint = async (req, res) => {
@@ -17,6 +18,7 @@ const updateComplaint = async (req, res) => {
 
     applyComplaintUpdates(complaint, updates);
     await complaint.save();
+    await notifyStudentAboutComplaintUpdate(complaint, updates).catch(() => {});
 
     return res.status(200).json({ success: true, message: 'Complaint updated successfully.', data: complaint });
   } catch (error) {
