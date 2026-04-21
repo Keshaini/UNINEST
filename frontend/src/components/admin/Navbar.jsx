@@ -56,7 +56,9 @@ const Navbar = ({ isMobileMenuOpen, setIsMobileMenuOpen, setActiveTab }) => {
             {/* Search Bar */}
             <div className="flex-1 max-w-xl hidden md:block ml-4 md:ml-0">
                 <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-400 transition-colors" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Search className="w-4 h-4 text-slate-400 group-focus-within:text-indigo-400 transition-colors" />
+                    </div>
                     <input
                         type="text"
                         placeholder="Search students, rooms, payments..."

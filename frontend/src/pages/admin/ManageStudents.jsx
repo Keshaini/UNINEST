@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Filter, MoreVertical, ShieldAlert, UserX, UserCheck, Trash2, X, AlertTriangle, AlertCircle, CheckCircle, Clock, Edit } from 'lucide-react';
+import { Search, Filter, MoreVertical, ShieldAlert, UserX, UserCheck, Trash2, X, AlertTriangle, AlertCircle, CheckCircle, Clock, Edit, Book, ChevronDown } from 'lucide-react';
+import { toast } from 'react-toastify';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 const ManageStudents = () => {
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     // Warning Modal State
     const [warningModalOpen, setWarningModalOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -23,6 +25,25 @@ const ManageStudents = () => {
         gender: ''
     });
 
+    // Confirmation Modal State
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        onConfirm: () => {},
+        title: '',
+        message: '',
+        type: 'danger'
+    });
+
+    const openConfirm = (title, message, onConfirm, type = 'danger') => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            message,
+            onConfirm,
+            type
+        });
+    };
+
     useEffect(() => {
         fetchStudents();
     }, []);
@@ -33,73 +54,89 @@ const ManageStudents = () => {
             const res = await axios.get('http://localhost:5000/api/students', {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Filter out fully deleted from normal view if desired, or keep them. 
-            // We'll keep them to show 'Deleted' badge.
             setStudents(res.data);
             setLoading(false);
         } catch (err) {
             console.error('Failed to fetch students:', err);
+            toast.error('Could not connect to the database.');
             setLoading(false);
         }
     };
 
     const handleToggleStatus = async (studentId, currentStatus) => {
-        if (currentStatus === 'Deleted') return; // Cannot toggle deleted
+        if (currentStatus === 'Deleted') return; 
         const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.put(`http://localhost:5000/api/students/${studentId}/status`, 
+            await axios.put(`http://localhost:5000/api/students/${studentId}/status`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setStudents(students.map(s => s._id === studentId ? { ...s, status: newStatus } : s));
+            toast.success(`Student status changed to ${newStatus}`);
         } catch (err) {
             console.error('Failed to change status:', err);
-            alert('Error updating status');
+            toast.error('Error updating status');
         }
     };
 
     const handleDeleteStudent = async (studentId) => {
-        if (!window.confirm('Are you sure you want to vacate this student account? It will be marked as vacated but not permanently deleted yet.')) return;
-        try {
-            const token = localStorage.getItem('adminToken');
-            await axios.delete(`http://localhost:5000/api/students/${studentId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setStudents(students.map(s => s._id === studentId ? { ...s, status: 'Deleted' } : s));
-        } catch (err) {
-            console.error('Failed to delete student:', err);
-            alert('Error vacating student');
-        }
+        openConfirm(
+            "Vacate Account?", 
+            "This student's status will be set to 'Vacated' which will free their bed allocation while retaining their records.",
+            async () => {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    await axios.delete(`http://localhost:5000/api/students/${studentId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setStudents(students.map(s => s._id === studentId ? { ...s, status: 'Deleted' } : s));
+                    toast.success('Room vacated successfully!');
+                } catch (err) {
+                    toast.error('Error vacating student record');
+                }
+            }
+        );
     };
 
     const handleRestoreStudent = async (studentId) => {
-        if (!window.confirm('Are you sure you want to restore this student?')) return;
-        try {
-            const token = localStorage.getItem('adminToken');
-            await axios.put(`http://localhost:5000/api/students/${studentId}/restore`, 
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setStudents(students.map(s => s._id === studentId ? { ...s, status: 'Active' } : s));
-        } catch (err) {
-            console.error('Failed to restore student:', err);
-            alert('Error restoring student');
-        }
+        openConfirm(
+            "Restore Student?",
+            "Re-activate this student record and allow dashboard access.",
+            async () => {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    await axios.put(`http://localhost:5000/api/students/${studentId}/restore`,
+                        {},
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    setStudents(students.map(s => s._id === studentId ? { ...s, status: 'Active' } : s));
+                    toast.success('Student record restored!');
+                } catch (err) {
+                    toast.error('Error restoring student');
+                }
+            },
+            'info'
+        );
     };
 
     const handlePermanentDelete = async (studentId) => {
-        if (!window.confirm('WARNING: This will permanently delete the student and all related records (allocations, payments). This cannot be undone. Proceed?')) return;
-        try {
-            const token = localStorage.getItem('adminToken');
-            await axios.delete(`http://localhost:5000/api/students/${studentId}/permanent`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setStudents(students.filter(s => s._id !== studentId));
-        } catch (err) {
-            console.error('Failed to delete student permanently:', err);
-            alert('Error deleting student permanently');
-        }
+        openConfirm(
+            "CRITICAL: Permanent Delete",
+            "Warning: This will permanently purge the student and ALL their associated financial and booking records. Total data loss—are you absolute?",
+            async () => {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    await axios.delete(`http://localhost:5000/api/students/${studentId}/permanent`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setStudents(students.filter(s => s._id !== studentId));
+                    toast.success('Student account permanently deleted.');
+                } catch (err) {
+                    toast.error('Error during permanent deletion');
+                }
+            }
+        );
     };
 
     const openWarningModal = (student) => {
@@ -111,31 +148,41 @@ const ManageStudents = () => {
     const saveWarning = async () => {
         try {
             const token = localStorage.getItem('adminToken');
-            await axios.put(`http://localhost:5000/api/students/${selectedStudent._id}/warning`, 
+            await axios.put(`http://localhost:5000/api/students/${selectedStudent._id}/warning`,
                 { adminWarning: warningText },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setStudents(students.map(s => s._id === selectedStudent._id ? { ...s, adminWarning: warningText, warningAcknowledged: false } : s));
             setWarningModalOpen(false);
+            if (warningText) {
+                toast.warning('Warning published to student dashboard');
+            } else {
+                toast.info('Warning cleared');
+            }
         } catch (err) {
-            console.error('Failed to save warning:', err);
-            alert('Error updating warning');
+            toast.error('Error updating student warning');
         }
     };
 
     const clearWarning = async (studentId) => {
-        if (!window.confirm('Are you sure you want to remove the warning from this student?')) return;
-        try {
-            const token = localStorage.getItem('adminToken');
-            await axios.put(`http://localhost:5000/api/students/${studentId}/warning`, 
-                { adminWarning: '' },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setStudents(students.map(s => s._id === studentId ? { ...s, adminWarning: '', warningAcknowledged: false } : s));
-        } catch (err) {
-            console.error('Failed to clear warning:', err);
-            alert('Error clearing warning');
-        }
+        openConfirm(
+            "Clear Warning?",
+            "Remove the active administrative warning from this student's profile.",
+            async () => {
+                try {
+                    const token = localStorage.getItem('adminToken');
+                    await axios.put(`http://localhost:5000/api/students/${studentId}/warning`,
+                        { adminWarning: '' },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+                    setStudents(students.map(s => s._id === studentId ? { ...s, adminWarning: '', warningAcknowledged: false } : s));
+                    toast.info('Academic warning cleared');
+                } catch (err) {
+                    toast.error('Error clearing warning');
+                }
+            },
+            'warning'
+        );
     };
 
     const openEditModal = (student) => {
@@ -158,21 +205,21 @@ const ManageStudents = () => {
     const saveEdit = async () => {
         try {
             const token = localStorage.getItem('adminToken');
-            const res = await axios.put(`http://localhost:5000/api/students/${selectedStudent._id}`, 
+            const res = await axios.put(`http://localhost:5000/api/students/${selectedStudent._id}`,
                 editFormData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             setStudents(students.map(s => s._id === selectedStudent._id ? { ...s, ...res.data } : s));
             setEditModalOpen(false);
+            toast.success('Student profile updated successfully!');
         } catch (err) {
-            console.error('Failed to save student details:', err);
-            alert(err.response?.data?.msg || 'Error updating student details');
+            toast.error(err.response?.data?.msg || 'Error updating student details');
         }
     };
 
 
-    const filteredStudents = students.filter(s => 
-        s.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const filteredStudents = students.filter(s =>
+        s.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.registrationNumber?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -185,20 +232,22 @@ const ManageStudents = () => {
                     <h1 className="text-3xl font-bold tracking-tight text-white mb-1">Student Directory</h1>
                     <p className="text-slate-400 text-sm font-medium">Manage all registered hostel students and accounts.</p>
                 </div>
-                
+
                 <div className="flex w-full md:w-auto gap-3">
                     <div className="relative flex-1 md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                        <input 
-                            type="text" 
-                            placeholder="Search students..." 
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Search className="w-4 h-4 text-slate-500" />
+                    </div>
+                        <input
+                            type="text"
+                            placeholder="Search students..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full bg-slate-900 border border-slate-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:border-indigo-500/50 transition-all font-medium text-slate-200"
                         />
                     </div>
                     <button className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition-colors flex items-center gap-2 text-sm font-medium shadow-sm">
-                        <Filter className="w-4 h-4"/> Filters
+                        <Filter className="w-4 h-4" /> Filters
                     </button>
                 </div>
             </div>
@@ -216,7 +265,7 @@ const ManageStudents = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredStudents.map(student => (
                         <div key={student._id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl relative group transition-all hover:border-indigo-500/30">
-                            
+
                             {/* Card Header: Avatar & Status */}
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-3">
@@ -240,11 +289,11 @@ const ManageStudents = () => {
                                 </div>
                                 {/* Status Badge */}
                                 {student.status === 'Deleted' ? (
-                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1"><UserX className="w-3 h-3"/> VACATED</span>
+                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center gap-1"><UserX className="w-3 h-3" /> VACATED</span>
                                 ) : student.status === 'Inactive' ? (
-                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-slate-500/10 border border-slate-500/20 text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3"/> INACTIVE</span>
+                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-slate-500/10 border border-slate-500/20 text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> INACTIVE</span>
                                 ) : (
-                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-green-500/10 border border-green-500/20 text-green-400 flex items-center gap-1"><UserCheck className="w-3 h-3"/> ACTIVE</span>
+                                    <span className="px-2.5 py-1 text-[10px] uppercase tracking-widest font-bold rounded-full bg-green-500/10 border border-green-500/20 text-green-400 flex items-center gap-1"><UserCheck className="w-3 h-3" /> ACTIVE</span>
                                 )}
                             </div>
 
@@ -269,12 +318,12 @@ const ManageStudents = () => {
                                         </div>
                                         <div className="flex items-center justify-between w-full mt-1 border-t border-red-500/20 pt-2">
                                             {student.warningAcknowledged ? (
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400 flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded-md"><CheckCircle className="w-3 h-3"/> Considered</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400 flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded-md"><CheckCircle className="w-3 h-3" /> Considered</span>
                                             ) : (
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-1 bg-orange-500/10 px-2 py-0.5 rounded-md"><Clock className="w-3 h-3"/> Pending</span>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400 flex items-center gap-1 bg-orange-500/10 px-2 py-0.5 rounded-md"><Clock className="w-3 h-3" /> Pending</span>
                                             )}
                                             <button onClick={() => clearWarning(student._id)} className="text-slate-500 hover:text-red-400 transition-colors p-1 bg-slate-800 hover:bg-red-500/10 rounded-md" title="Remove Warning">
-                                                <Trash2 className="w-3.5 h-3.5"/>
+                                                <Trash2 className="w-3.5 h-3.5" />
                                             </button>
                                         </div>
                                     </div>
@@ -285,64 +334,72 @@ const ManageStudents = () => {
                             <div className="mb-5 bg-slate-950/50 p-3 rounded-xl border border-slate-800/50">
                                 <div className="flex justify-between items-center mb-1.5">
                                     <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Profile Data</span>
-                                    <span className="text-xs font-bold text-indigo-400">{student.profileCompletion || 10}%</span>
+                                    <span className={`text-xs font-bold ${student.profileCompletion === 100 ? 'text-green-400' :
+                                            student.profileCompletion <= 10 ? 'text-red-400' : 'text-blue-400'
+                                        }`}>
+                                        {student.profileCompletion || 10}%
+                                    </span>
                                 </div>
                                 <div className="w-full bg-slate-800 rounded-full h-1.5">
-                                    <div className={`h-1.5 rounded-full ${student.profileCompletion === 100 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-indigo-500'}`} style={{ width: `${student.profileCompletion || 10}%` }}></div>
+                                    <div
+                                        className={`h-1.5 rounded-full transition-all duration-500 ${student.profileCompletion === 100 ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]' :
+                                                student.profileCompletion <= 10 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' :
+                                                    'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]'
+                                            }`}
+                                        style={{ width: `${student.profileCompletion || 10}%` }}
+                                    ></div>
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
                             {student.status === 'Deleted' ? (
                                 <div className="grid grid-cols-2 gap-2 mt-auto text-center">
-                                    <button 
+                                    <button
                                         onClick={() => handleRestoreStudent(student._id)}
                                         className="py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
                                     >
-                                        <UserCheck className="w-4 h-4"/> Restore
+                                        <UserCheck className="w-4 h-4" /> Restore
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handlePermanentDelete(student._id)}
                                         className="py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50"
                                     >
-                                        <Trash2 className="w-4 h-4"/> Delete Perma
+                                        <Trash2 className="w-4 h-4" /> Delete Perma
                                     </button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-2 mt-auto">
-                                    <button 
+                                    <button
                                         onClick={() => openEditModal(student)}
                                         className="py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
                                     >
-                                        <Edit className="w-4 h-4"/> Edit
+                                        <Edit className="w-4 h-4" /> Edit
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={() => handleToggleStatus(student._id, student.status || 'Active')}
-                                        className={`py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border ${
-                                            student.status === 'Inactive' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20' : 
-                                            'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
-                                        }`}
+                                        className={`py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border ${student.status === 'Inactive' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20' :
+                                                'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
+                                            }`}
                                         title={student.status === 'Inactive' ? 'Mark Active' : 'Mark Inactive'}
                                     >
-                                        {student.status === 'Inactive' ? <UserCheck className="w-4 h-4"/> : <UserX className="w-4 h-4"/>}
+                                        {student.status === 'Inactive' ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
                                         {student.status === 'Inactive' ? 'Enable' : 'Disable'}
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={() => openWarningModal(student)}
-                                        className={`py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border ${
-                                            student.adminWarning ? 'bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
-                                        }`}
+                                        className={`py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border ${student.adminWarning ? 'bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
+                                            }`}
                                     >
-                                        <ShieldAlert className="w-4 h-4"/> Warn
+                                        <ShieldAlert className="w-4 h-4" /> Warn
                                     </button>
-                                    
-                                    <button 
+
+                                    <button
                                         onClick={() => handleDeleteStudent(student._id)}
                                         className="py-2 flex justify-center items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase rounded-xl transition-all border bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50"
                                     >
-                                        <Trash2 className="w-4 h-4"/> Vacate
+                                        <Trash2 className="w-4 h-4" /> Vacate
                                     </button>
                                 </div>
                             )}
@@ -381,7 +438,7 @@ const ManageStudents = () => {
                             />
                         </div>
                         <div className="flex items-center gap-3 p-6 pt-2">
-                            <button 
+                            <button
                                 onClick={() => {
                                     setWarningText('');
                                     saveWarning();
@@ -390,8 +447,8 @@ const ManageStudents = () => {
                             >
                                 Clear Warning
                             </button>
-                            <button 
-                                onClick={saveWarning} 
+                            <button
+                                onClick={saveWarning}
                                 className="flex-1 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium shadow-[0_4px_20px_rgba(79,70,229,0.3)] rounded-xl transition-all"
                             >
                                 Publish Warning
@@ -437,7 +494,22 @@ const ManageStudents = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">Course</label>
-                                <input type="text" name="course" value={editFormData.course} onChange={handleEditChange} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-200 focus:border-indigo-500 outline-none transition-all" />
+                                <div className="relative group">
+                                    <Book className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 group-focus-within:text-indigo-500 transition-colors flex shrink-0" />
+                                    <select 
+                                        name="course" 
+                                        value={editFormData.course} 
+                                        onChange={handleEditChange} 
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-12 pr-10 py-2.5 text-slate-200 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer font-medium"
+                                    >
+                                        <option value="" disabled>Select Course</option>
+                                        <option value="IT">IT</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Biomedical">Biomedical</option>
+                                        <option value="Business">Business</option>
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">Batch Year</label>
@@ -455,7 +527,16 @@ const ManageStudents = () => {
                     </div>
                 </div>
             )}
-            
+
+            <ConfirmationModal 
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                onConfirm={confirmModal.onConfirm}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+            />
+
             <style jsx>{`
                 @keyframes scale-in {
                     from { transform: scale(0.95); opacity: 0; }

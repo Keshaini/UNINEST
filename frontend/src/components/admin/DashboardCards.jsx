@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Building2, IndianRupee, AlertCircle } from 'lucide-react';
+import { Users, Building2, AlertCircle } from 'lucide-react';
 
 const DashboardCards = ({ stats }) => {
     const cards = [
@@ -22,15 +22,6 @@ const DashboardCards = ({ stats }) => {
             borderColor: 'border-green-500/30'
         },
         {
-            title: 'Revenue (Monthly)',
-            value: `₹${stats.revenue.toLocaleString()}`,
-            status: '+5% this month',
-            icon: IndianRupee,
-            color: 'text-yellow-500',
-            bgColor: 'bg-yellow-500/10',
-            borderColor: 'border-yellow-500/30'
-        },
-        {
             title: 'Open Complaints',
             value: stats.openComplaints,
             status: 'Needs attention',
@@ -42,7 +33,7 @@ const DashboardCards = ({ stats }) => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {cards.map((card, index) => (
                 <div key={index} className={`bg-[#0f172a] border-t-[3px] ${card.borderColor} rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.3)] hover:shadow-lg transition-all duration-300`}>
                     <div className="flex items-center justify-between mb-4">

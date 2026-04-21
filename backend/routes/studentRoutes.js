@@ -8,7 +8,6 @@ router.put('/warning/acknowledge', protect, studentController.acknowledgeWarning
 router.get('/profile', protect, studentController.getProfile);
 router.put('/profile', protect, studentController.updateProfile);
 router.get('/room', protect, studentController.getRoom);
-router.get('/payments', protect, studentController.getPayments);
 router.get('/complaints', protect, studentController.getComplaints);
 router.put('/:id/status', protect, authorizeAdmin, studentController.updateStudentStatus);
 router.put('/:id/warning', protect, authorizeAdmin, studentController.updateStudentWarning);

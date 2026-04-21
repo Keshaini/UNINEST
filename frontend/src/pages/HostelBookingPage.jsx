@@ -126,7 +126,7 @@ function HostelBookingPage() {
             {hostelError || 'The hostel you selected is unavailable. Please return and choose another hostel.'}
           </p>
           <button
-            onClick={() => navigate('/hostels')}
+            onClick={() => navigate('/rooms')}
             className="submit-button submit-button-primary"
           >
             Back to Hostels
@@ -212,7 +212,7 @@ function HostelBookingPage() {
           </div>
 
           <button
-            onClick={() => navigate('/hostels')}
+            onClick={() => navigate('/rooms')}
             className="back-button"
           >
             ← Back to Search
@@ -382,7 +382,7 @@ function HostelBookingPage() {
                 We'll be in touch soon with confirmation details.
               </p>
               <button
-                onClick={() => navigate('/hostels')}
+                onClick={() => navigate('/rooms')}
                 className="submit-button submit-button-primary"
               >
                 Return to Hostels

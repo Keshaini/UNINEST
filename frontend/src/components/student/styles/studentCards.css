@@ -1,0 +1,325 @@
+.student-tickets-shell .ticket-summary {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.student-tickets-shell .tickets-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.student-tickets-shell .tickets-header-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.student-tickets-shell .tickets-header-copy p {
+  margin: 0;
+}
+
+.student-tickets-shell .back-btn {
+  border: 1px solid rgba(100, 116, 139, 0.45);
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 0.42rem 0.86rem 0.42rem 0.62rem;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
+}
+
+.student-tickets-shell .back-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.student-tickets-shell .back-btn:active {
+  transform: translateY(1px);
+}
+
+.student-tickets-shell .back-btn:focus-visible {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.student-tickets-shell .back-btn-icon {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.student-tickets-shell .back-btn-icon svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.student-tickets-shell .back-btn-text {
+  line-height: 1;
+}
+
+.student-tickets-shell .summary-item {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 0.52rem 0.68rem;
+  display: grid;
+  gap: 0.08rem;
+}
+
+.student-tickets-shell .summary-label {
+  color: #64748b;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.student-tickets-shell .summary-value {
+  color: #0f172a;
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.student-tickets-shell .inline-feedback {
+  margin-top: 0.72rem;
+  border-radius: 10px;
+  padding: 0.54rem 0.72rem;
+  font-weight: 600;
+  font-size: 0.84rem;
+  border: 1px solid transparent;
+}
+
+.student-tickets-shell .inline-feedback.success {
+  background: #e7f7ef;
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.2);
+}
+
+.student-tickets-shell .inline-feedback.error {
+  background: #feeceb;
+  color: #9f1239;
+  border-color: rgba(159, 18, 57, 0.18);
+}
+
+.student-tickets-shell .my-ticket-toolbar {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.8rem;
+  align-items: center;
+}
+
+.student-tickets-shell .toolbar-hint {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.student-tickets-shell .my-ticket-toolbar .secondary-btn,
+.student-tickets-shell .my-ticket-toolbar .ghost-btn {
+  width: auto;
+  min-height: 40px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.88rem;
+}
+
+.student-tickets-shell .my-ticket-toolbar .secondary-btn {
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+}
+
+.student-tickets-shell .my-ticket-toolbar .ghost-btn {
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  color: #1e293b;
+  background: #ffffff;
+}
+
+.student-tickets-shell .complaint-list {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.student-tickets-shell .complaint-card {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-left: 4px solid #94a3b8;
+  border-radius: 12px;
+  padding: 0.72rem;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.student-tickets-shell .complaint-card.status-pending { border-left-color: #d97706; }
+.student-tickets-shell .complaint-card.status-in_progress { border-left-color: #2563eb; }
+.student-tickets-shell .complaint-card.status-resolved { border-left-color: #16a34a; }
+.student-tickets-shell .complaint-card.status-rejected { border-left-color: #dc2626; }
+
+.student-tickets-shell .ticket-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.student-tickets-shell .complaint-card h3 {
+  margin: 0.45rem 0 0.28rem;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.student-tickets-shell .complaint-card p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.student-tickets-shell .chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.student-tickets-shell .chip {
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.16rem 0.52rem;
+}
+
+.student-tickets-shell .ticket-id {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.student-tickets-shell .chip.category { background: #f1f5f9; color: #475569; }
+.student-tickets-shell .status-pending { background: #fff1d8; color: #955d00; }
+.student-tickets-shell .status-in_progress { background: #dbe8ff; color: #1a4e9f; }
+.student-tickets-shell .status-resolved { background: #dff3ea; color: #0b6a45; }
+.student-tickets-shell .status-rejected { background: #fbe2de; color: #9d2414; }
+.student-tickets-shell .priority-low { background: #e7f6fb; color: #1b6e88; }
+.student-tickets-shell .priority-medium { background: #e7e9fa; color: #424c9e; }
+.student-tickets-shell .priority-high { background: #fdf0d9; color: #9a6610; }
+.student-tickets-shell .priority-urgent { background: #fddfd9; color: #9a2715; }
+
+.student-tickets-shell .meta-grid {
+  margin-top: 0.58rem;
+  display: grid;
+  gap: 0.32rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 9px;
+  padding: 0.5rem 0.58rem;
+}
+
+.student-tickets-shell .meta-item {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.student-tickets-shell .meta-item dt,
+.student-tickets-shell .meta-item dd {
+  margin: 0;
+}
+
+.student-tickets-shell .meta-item dt {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.74rem;
+}
+
+.student-tickets-shell .meta-item dd {
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.student-tickets-shell .ticket-card-actions {
+  margin-top: 0.62rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.student-tickets-shell .ticket-card-actions .ghost-btn {
+  width: auto;
+  min-height: 34px;
+  border-radius: 9px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 0.45rem 0.82rem;
+}
+
+.student-tickets-shell .empty-state {
+  color: #475569;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: #ffffff;
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0.9rem;
+}
+
+.student-panel .reveal {
+  animation: studentPanelReveal 420ms ease both;
+}
+
+.student-panel .delay {
+  animation-delay: 110ms;
+}
+
+@media (max-width: 900px) {
+  .student-tickets-shell .tickets-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-tickets-shell .ticket-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .student-tickets-shell .complaint-list {
+    grid-template-columns: 1fr;
+  }
+
+  .student-tickets-shell .meta-item {
+    grid-template-columns: 1fr;
+    gap: 0.08rem;
+  }
+}
+
+@keyframes studentPanelReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

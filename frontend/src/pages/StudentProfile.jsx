@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import StudentNavbar from '../components/studentDashboard/StudentNavbar';
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { toast } from 'react-toastify';
 
 export default function StudentProfile() {
     const location = useLocation();
@@ -57,9 +58,10 @@ export default function StudentProfile() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProfile(prev => ({ ...prev, warningAcknowledged: true }));
+            toast.success('Warning acknowledged. Thank you for your attention.');
         } catch (err) {
             console.error('Failed to acknowledge warning', err);
-            alert('Error acknowledging the warning. Please try again.');
+            toast.error('Error acknowledging the warning. Please try again.');
         }
     };
 
@@ -90,8 +92,10 @@ export default function StudentProfile() {
             setProfile(res.data);
             setProfileCompletion(newCompletion);
             setStep(0); // Back to profile view
+            toast.success('Profile preferences updated successfully!');
         } catch (err) {
             console.error(err);
+            toast.error('Failed to save profile preferences.');
         }
     };
 
@@ -150,8 +154,10 @@ export default function StudentProfile() {
                 });
                 setProfile(res.data);
                 setCropModalOpen(false);
+                toast.success('Profile picture updated successfully!');
             } catch (err) {
                 console.error("Error uploading profile pic", err);
+                toast.error('Failed to upload profile picture.');
             }
         } else {
             setCropModalOpen(false);
@@ -510,10 +516,20 @@ export default function StudentProfile() {
                                     <div className="bg-slate-950/50 rounded-xl p-5 border border-slate-800/50">
                                         <div className="flex justify-between text-sm mb-3">
                                             <span className="font-semibold text-slate-300">Profile Completion</span>
-                                            <span className="font-bold text-indigo-400">{profileCompletion}%</span>
+                                            <span className={`font-bold ${
+                                                profileCompletion === 100 ? 'text-green-400' : 
+                                                profileCompletion <= 10 ? 'text-red-400' : 'text-blue-400'
+                                            }`}>{profileCompletion}%</span>
                                         </div>
                                         <div className="w-full bg-slate-800 rounded-full h-2">
-                                            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" style={{ width: `${profileCompletion}%` }}></div>
+                                            <div 
+                                                className={`h-2 rounded-full transition-all duration-500 ${
+                                                    profileCompletion === 100 ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]' : 
+                                                    profileCompletion <= 10 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 
+                                                    'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]'
+                                                }`} 
+                                                style={{ width: `${profileCompletion}%` }}
+                                            ></div>
                                         </div>
                                         {profileCompletion < 100 && (
                                             <p className="text-xs text-yellow-500 mt-3 flex items-center gap-1.5 font-medium">
@@ -670,10 +686,20 @@ export default function StudentProfile() {
                                     <div className="mb-10">
                                         <div className="flex justify-between text-sm mb-3">
                                             <span className="font-semibold text-slate-300">Wizard Progress</span>
-                                            <span className="font-bold text-indigo-400">{profileCompletion}%</span>
+                                            <span className={`font-bold ${
+                                                profileCompletion === 100 ? 'text-green-400' : 
+                                                profileCompletion <= 10 ? 'text-red-400' : 'text-blue-400'
+                                            }`}>{profileCompletion}%</span>
                                         </div>
                                         <div className="w-full bg-slate-800 rounded-full h-2">
-                                            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" style={{ width: `${profileCompletion}%` }}></div>
+                                            <div 
+                                                className={`h-2 rounded-full transition-all duration-500 ${
+                                                    profileCompletion === 100 ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]' : 
+                                                    profileCompletion <= 10 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 
+                                                    'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]'
+                                                }`} 
+                                                style={{ width: `${profileCompletion}%` }}
+                                            ></div>
                                         </div>
                                     </div>
 

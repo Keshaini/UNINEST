@@ -1,7 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Download, TrendingUp, Calendar, DollarSign, FileText, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getFinancialSummary, getPaymentAnalytics, exportPayments, exportInvoices } from '../../services/paymentService';
+import React, { useState, useEffect } from 'react';
+import { 
+    Download, 
+    TrendingUp, 
+    Calendar, 
+    DollarSign, 
+    FileText, 
+    BarChart3, 
+    Activity, 
+    Filter, 
+    ChevronRight, 
+    Search, 
+    Loader2,
+    ShieldCheck,
+    PieChart as PieChartIcon,
+    ArrowDownToLine,
+    RefreshCw
+} from 'lucide-react';
+import { 
+    BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, 
+    CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area 
+} from 'recharts';
+import { 
+    getFinancialSummary, 
+    getPaymentAnalytics, 
+    exportPayments, 
+    exportInvoices 
+} from '../../services/paymentService';
+import { toast } from 'react-toastify';
 
 function Reports() {
   const [financialData, setFinancialData] = useState(null);
@@ -12,13 +37,14 @@ function Reports() {
     endDate: ''
   });
   const [exporting, setExporting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchReports();
   }, []);
 
   const fetchReports = async () => {
-    setLoading(true);
+    setRefreshing(true);
     try {
       const params = {};
       if (dateRange.startDate) params.startDate = dateRange.startDate;
@@ -29,22 +55,18 @@ function Reports() {
         getPaymentAnalytics()
       ]);
 
-      if (financialResponse.success) {
-        setFinancialData(financialResponse.data);
-      }
-
-      if (analyticsResponse.success) {
-        setAnalyticsData(analyticsResponse.data);
-      }
+      if (financialResponse.success) setFinancialData(financialResponse.data);
+      if (analyticsResponse.success) setAnalyticsData(analyticsResponse.data);
     } catch (err) {
-      console.error('Failed to fetch reports:', err);
+      toast.error('Failed to synchronize global financial matrix.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   const handleExport = async (type) => {
-    setExporting(true);
+    setExporting(type);
     try {
       const params = {};
       if (dateRange.startDate) params.startDate = dateRange.startDate;
@@ -55,8 +77,9 @@ function Reports() {
       } else if (type === 'invoices') {
         await exportInvoices(params);
       }
+      toast.success(`${type.toUpperCase()} manifest exported successfully.`);
     } catch (err) {
-      alert('Failed to export data');
+      toast.error(`Export synthesis failure: ${type}`);
     } finally {
       setExporting(false);
     }
@@ -67,12 +90,11 @@ function Reports() {
       style: 'currency',
       currency: 'LKR',
       minimumFractionDigits: 0
-    }).format(amount);
+    }).format(amount || 0);
   };
 
-  const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+  const COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
-  // Prepare chart data
   const statusChartData = financialData?.statusBreakdown?.map(item => ({
     name: item._id,
     value: item.count,
@@ -86,310 +108,273 @@ function Reports() {
   })) || [];
 
   const monthlyTrendData = financialData?.monthlyTrend?.map(item => ({
-    month: `${item._id.month}/${item._id.year}`,
-    amount: item.totalPayments,
-    count: item.count
-  })) || [];
+    month: new Date(item._id.year, item._id.month - 1).toLocaleString('en-LK', {
+        month: 'short',
+        year: 'numeric'
+    }),
+    amount: item.totalPayments || 0,
+    count: item.count || 0
+})) || [];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading reports...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-32">
+        <Loader2 className="w-16 h-16 text-indigo-500 animate-spin mb-6" />
+        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Calibrating Financial Command Matrix</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Financial Reports & Analytics</h1>
-          <p className="text-gray-600 mt-2">Comprehensive billing and payment insights</p>
-        </div>
-
-        {/* Date Range Filter & Export */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
+    <div className="space-y-12 animate-fade-in">
+        {/* Header section */}
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+            <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-500 mb-2">Central Analytics Module</p>
+                <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tight flex items-center gap-5">
+                    <Activity className="text-indigo-500 w-12 h-12" />
+                    Financial Intelligence
+                </h1>
+                <p className="text-slate-500 font-medium mt-3 tracking-wide">Real-time oversight of institutional cashflow and student financial integrity.</p>
             </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={fetchReports}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Apply Filter
-              </button>
-              <button
-                onClick={() => handleExport('payments')}
-                disabled={exporting}
-                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export Payments
-              </button>
-              <button
-                onClick={() => handleExport('invoices')}
-                disabled={exporting}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export Invoices
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Total Billed</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(financialData?.summary?.totalBilled || 0)}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Total Collected</p>
-            <p className="text-2xl font-bold text-green-600">
-              {formatCurrency(financialData?.summary?.totalPaid || 0)}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Outstanding</p>
-            <p className="text-2xl font-bold text-red-600">
-              {formatCurrency(financialData?.summary?.totalOutstanding || 0)}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">Collection Rate</p>
-            <p className="text-2xl font-bold text-purple-600">
-              {financialData?.summary?.totalBilled > 0
-                ? ((financialData?.summary?.totalPaid / financialData?.summary?.totalBilled) * 100).toFixed(1)
-                : 0}%
-            </p>
-          </div>
-        </div>
-
-        {/* Charts Row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Monthly Trend Chart */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Monthly Payment Trend</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyTrendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value) => formatCurrency(value)}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="amount" 
-                  stroke="#4F46E5" 
-                  strokeWidth={2}
-                  name="Total Amount"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Payment Methods Chart */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Payment Methods Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={paymentMethodData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => {
-                    if (name === 'total') return formatCurrency(value);
-                    return value;
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="count" fill="#4F46E5" name="Count" />
-                <Bar dataKey="total" fill="#10B981" name="Total Amount" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Charts Row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Invoice Status Distribution */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Invoice Status Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={statusChartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
+            
+            <div className="flex flex-wrap gap-4 w-full md:w-auto">
+                <button
+                    onClick={() => handleExport('payments')}
+                    disabled={exporting === 'payments'}
+                    className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-400 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {statusChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                    {exporting === 'payments' ? <Loader2 className="animate-spin" size={14} /> : <ArrowDownToLine size={14} />}
+                    Payments Manifest
+                </button>
+                <button
+                    onClick={() => handleExport('invoices')}
+                    disabled={exporting === 'invoices'}
+                    className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-indigo-600 hover:bg-indigo-500 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-indigo-900/20 transition-all active:scale-95 disabled:opacity-50"
+                >
+                    {exporting === 'invoices' ? <Loader2 className="animate-spin" size={14} /> : <FileText size={14} />}
+                    Invoices Archive
+                </button>
+            </div>
+        </header>
 
-          {/* Payment Analytics */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Payment Analytics</h3>
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-600 mb-1">Average Payment Time</p>
-                <p className="text-2xl font-bold text-blue-900">
-                  {analyticsData?.paymentTiming?.avgDays?.toFixed(1) || 0} days
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-xs text-green-600 mb-1">Fastest Payment</p>
-                  <p className="text-xl font-bold text-green-900">
-                    {analyticsData?.paymentTiming?.minDays?.toFixed(0) || 0} days
-                  </p>
+        {/* Global Filter Bar */}
+        <div className="bg-slate-900/60 border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl backdrop-blur-md">
+            <div className="flex flex-col xl:flex-row gap-8 items-end">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                    <DateInput label="Temporal Start" value={dateRange.startDate} onChange={(val) => setDateRange(p => ({...p, startDate: val}))} />
+                    <DateInput label="Temporal End" value={dateRange.endDate} onChange={(val) => setDateRange(p => ({...p, endDate: val}))} />
                 </div>
-                <div className="p-4 bg-red-50 rounded-lg">
-                  <p className="text-xs text-red-600 mb-1">Slowest Payment</p>
-                  <p className="text-xl font-bold text-red-900">
-                    {analyticsData?.paymentTiming?.maxDays?.toFixed(0) || 0} days
-                  </p>
-                </div>
-              </div>
+                <button
+                    onClick={fetchReports}
+                    disabled={refreshing}
+                    className="w-full xl:w-auto flex items-center justify-center gap-3 bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-black text-[10px] uppercase tracking-widest px-10 py-4 rounded-2xl transition-all shadow-2xl active:scale-95"
+                >
+                    {refreshing ? <Loader2 className="animate-spin" size={16} /> : <Filter size={16} />}
+                    Execute Filter
+                </button>
+            </div>
+        </div>
 
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-purple-600 mb-2">Payment Success Rate</p>
-                <div className="space-y-2">
-                  {analyticsData?.successRate?.map(item => (
-                    <div key={item._id} className="flex justify-between items-center">
-                      <span className="text-sm text-gray-700">{item._id}:</span>
-                      <span className="font-semibold text-purple-900">{item.count}</span>
+        {/* Core Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <MetricCard title="Gross Billed" value={formatCurrency(financialData?.summary?.totalBilled)} icon={FileText} trend="+12.5%" color="indigo" />
+            <MetricCard title="Global Collected" value={formatCurrency(financialData?.summary?.totalPaid)} icon={DollarSign} trend="+8.2%" color="emerald" />
+            <MetricCard title="Net Outstanding" value={formatCurrency(financialData?.summary?.totalOutstanding)} icon={TrendingUp} trend="-4.1%" color="rose" />
+            <MetricCard title="Efficiency Rate" value={`${financialData?.summary?.totalBilled > 0 ? ((financialData?.summary?.totalPaid / financialData?.summary?.totalBilled) * 100).toFixed(1) : 0}%`} icon={BarChart3} trend="Stable" color="amber" />
+        </div>
+
+        {/* Analytics Visualization Layer */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            
+            <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-3xl flex flex-col group">
+                <div className="flex items-center justify-between mb-10">
+                    <div>
+                        <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
+                            <Activity className="text-indigo-500" size={24} />
+                            Payment Velocity
+                        </h3>
+                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Monthly collection synthesis</p>
                     </div>
-                  ))}
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Top Students Table */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Top 10 Paying Students</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rank</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Student Name</th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total Paid</th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Payments</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {analyticsData?.topStudents?.map((student, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <span className="font-bold text-indigo-600">#{index + 1}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">{student._id}</p>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <p className="font-semibold text-gray-900">
-                        {formatCurrency(student.totalPaid)}
-                      </p>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <p className="text-gray-900">{student.paymentCount}</p>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Refund Statistics */}
-        {financialData?.refunds && financialData.refunds.length > 0 && (
-          <div className="mt-8 bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Refund Statistics</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {financialData.refunds.map(refund => (
-                <div key={refund._id} className="p-4 border border-gray-200 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">{refund._id}</p>
-                  <p className="text-xl font-bold text-gray-900">{refund.count}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formatCurrency(refund.totalAmount)}
-                  </p>
+                <div className="flex-1 h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={monthlyTrendData}>
+                            <defs>
+                                <linearGradient id="comp-colorAmt" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                            <XAxis dataKey="month" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} dy={10} />
+                            <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} dx={-10} tickFormatter={(val) => `LKR ${val/1000}k`} />
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B', borderRadius: '16px' }}
+                                itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
+                                labelStyle={{ color: '#94A3B8', fontSize: '10px', textTransform: 'uppercase' }}
+                                formatter={(val) => [formatCurrency(val), 'Volume']}
+                            />
+                            <Area type="monotone" dataKey="amount" stroke="#6366F1" strokeWidth={4} fillOpacity={1} fill="url(#comp-colorAmt)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </div>
-              ))}
             </div>
-          </div>
-        )}
-      </div>
+
+            <div className="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-3xl">
+                <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3 mb-10">
+                    <PieChartIcon className="text-amber-500" size={24} />
+                    Status Quo
+                </h3>
+                <div className="h-[300px] mb-8">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={statusChartData}
+                                cx="50%" cy="50%"
+                                innerRadius={80} outerRadius={110}
+                                paddingAngle={8}
+                                dataKey="value"
+                            >
+                                {statusChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="transparent" />
+                                ))}
+                            </Pie>
+                            <Tooltip 
+                                contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #1E293B', borderRadius: '16px' }}
+                                itemStyle={{ color: '#F1F5F9', fontWeight: 'bold', fontSize: '12px' }}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="space-y-4 text-xs">
+                    {statusChartData.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-slate-950/50 rounded-xl border border-slate-800/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
+                                <span className="font-black text-slate-400 uppercase tracking-widest">{item.name}</span>
+                            </div>
+                            <span className="font-black text-white">{item.value} units</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="lg:col-span-12 grid grid-cols-1 xl:grid-cols-2 gap-8 lg:gap-12">
+                <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-10 shadow-3xl space-y-8">
+                    <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
+                        <TrendingUp className="text-emerald-500" size={24} />
+                        Efficiency Analytics
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <AnalyticsChip label="Avg Settle Time" value={`${analyticsData?.paymentTiming?.avgDays?.toFixed(1) || 0} Days`} color="indigo" />
+                        <AnalyticsChip label="Peak Latency" value={`${analyticsData?.paymentTiming?.maxDays?.toFixed(0) || 0} Days`} color="rose" />
+                    </div>
+                    <div className="space-y-4 pt-4 border-t border-slate-800">
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Gateway Distribution Intensity</p>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            {paymentMethodData.map((item, idx) => (
+                                <div key={idx} className="p-4 bg-slate-950 rounded-2xl border border-slate-800/50 flex flex-col items-center gap-2 group hover:border-indigo-500/50 transition-all">
+                                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none">{item.name}</span>
+                                    <span className="text-xl font-black text-white">{item.count}</span>
+                                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-tighter">{formatCurrency(item.total)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-4 lg:p-10 shadow-3xl overflow-hidden">
+                    <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3 mb-8 ml-6 mt-6 lg:m-0 lg:mb-10">
+                        <ShieldCheck className="text-indigo-500" size={24} />
+                        Global Financial Leaders
+                    </h3>
+                    <div className="overflow-x-auto px-6 lg:p-0">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-950/50 border-b border-slate-800">
+                                <tr>
+                                    <th className="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">Elite Index</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Aggregate Contribution</th>
+                                    <th className="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/30">
+                                {analyticsData?.topStudents?.map((student, index) => (
+                                    <tr key={index} className="group hover:bg-slate-950/40 transition-all">
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center gap-4">
+                                                <span className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-[10px] font-black text-indigo-400 whitespace-nowrap">0{index + 1}</span>
+                                                <span className="text-sm font-black text-slate-200 group-hover:text-white transition-colors">{student._id}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 text-right font-black text-slate-300 transition-colors whitespace-nowrap">{formatCurrency(student.totalPaid)}</td>
+                                        <td className="px-6 py-5 text-right text-[10px] font-black text-slate-600 uppercase tracking-widest group-hover:text-indigo-400 whitespace-nowrap">{student.paymentCount} Trans</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
   );
 }
+
+const DateInput = ({ label, value, onChange }) => (
+    <div className="space-y-3">
+        <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] ml-2 leading-none">{label}</label>
+        <div className="relative group">
+            <Calendar className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-indigo-500 transition-colors" size={16} />
+            <input
+                type="date"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full bg-slate-950/30 border border-slate-800/50 rounded-2xl pl-16 pr-6 py-4 text-xs font-black text-white outline-none focus:border-indigo-500/40 focus:bg-slate-950 transition-all cursor-pointer"
+            />
+        </div>
+    </div>
+);
+
+const MetricCard = ({ title, value, icon: Icon, trend, color }) => {
+    const colorMap = {
+        indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
+        emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+        rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+        amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+    };
+    return (
+        <div className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 shadow-2xl group hover:border-slate-700 transition-all relative overflow-hidden">
+            <div className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full blur-3xl -translate-y-16 translate-x-16 bg-current ${colorMap[color].split(' ')[0]}`}></div>
+            <div className="flex flex-col gap-6 relative z-10">
+                <div className="flex items-center justify-between">
+                    <div className={`p-4 rounded-2xl shadow-inner ${colorMap[color]}`}>
+                        <Icon size={24} />
+                    </div>
+                    <span className={`text-[9px] font-black px-3 py-1 bg-slate-950 rounded-lg border border-slate-800/50 uppercase tracking-widest whitespace-nowrap ${trend.startsWith('+') ? 'text-emerald-500' : trend.startsWith('-') ? 'text-rose-500' : 'text-slate-500'}`}>
+                        {trend}
+                    </span>
+                </div>
+                <div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">{title}</p>
+                    <h4 className="text-3xl font-black text-white tracking-tight">{value}</h4>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AnalyticsChip = ({ label, value, color }) => {
+    const colorMap = {
+        indigo: 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400',
+        rose: 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+    };
+    return (
+        <div className={`p-6 rounded-[2rem] border shadow-inner flex flex-col gap-2 ${colorMap[color]}`}>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-60 leading-none">{label}</span>
+            <span className="text-2xl font-black">{value}</span>
+        </div>
+    );
+};
 
 export default Reports;

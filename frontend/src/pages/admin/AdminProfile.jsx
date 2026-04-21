@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { User, Mail, Briefcase, Hash, Calendar, Camera, Save } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const AdminProfile = () => {
     const [profile, setProfile] = useState(null);
@@ -12,10 +13,6 @@ const AdminProfile = () => {
     const [profilePic, setProfilePic] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     
-    // Status messages
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-
     const fetchProfile = async () => {
         try {
             const token = localStorage.getItem('adminToken');
@@ -33,7 +30,7 @@ const AdminProfile = () => {
             }
             setLoading(false);
         } catch (err) {
-            setError(err.response?.data?.msg || 'Error loading profile');
+            toast.error(err.response?.data?.msg || 'Error loading profile');
             setLoading(false);
         }
     };
@@ -52,8 +49,6 @@ const AdminProfile = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
         
         try {
             const token = localStorage.getItem('adminToken');
@@ -68,12 +63,11 @@ const AdminProfile = () => {
             const res = await axios.put('http://localhost:5000/api/admin/profile', data, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
-                    // 'Content-Type': 'multipart/form-data' is omitted, axios handles it automatically with FormData
                 }
             });
             
             setProfile(res.data);
-            setSuccess('Profile updated successfully!');
+            toast.success('Profile updated successfully!');
             setIsEditing(false);
             
             // Update local storage user data to instantly reflect changes on navbar
@@ -81,13 +75,15 @@ const AdminProfile = () => {
             if(userStr) {
                  const usr = JSON.parse(userStr);
                  usr.name = `${res.data.firstName} ${res.data.lastName}`;
-                 localStorage.setItem('user', JSON.stringify(usr));
+                 usr.profilePic = res.data.profilePic; // Save the new profile picture path
+                 localStorage.setItem('adminUser', JSON.stringify(usr));
+                 
                  // Trigger a custom event to notify Navbar
                  window.dispatchEvent(new Event('user-profile-updated'));
             }
             
         } catch (err) {
-            setError(err.response?.data?.msg || 'Failed to update profile');
+            toast.error(err.response?.data?.msg || 'Failed to update profile');
         }
     };
 
@@ -109,9 +105,6 @@ const AdminProfile = () => {
                     </button>
                 )}
             </div>
-
-            {error && <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg mb-6">{error}</div>}
-            {success && <div className="bg-green-500/10 border border-green-500/50 text-green-500 p-3 rounded-lg mb-6">{success}</div>}
 
             <div className="flex flex-col md:flex-row gap-8 items-start">
                 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, DoorOpen, CreditCard, MessageSquare, LogOut, CheckSquare, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, DoorOpen, MessageSquare, LogOut, CheckSquare, Bell, CreditCard, FileText, BarChart3, Tag } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
 const Sidebar = ({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileMenuOpen }) => {
@@ -10,13 +10,16 @@ const Sidebar = ({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileMenuOpe
     };
 
     const navItems = [
-        { id: 'Dashboard', icon: LayoutDashboard },
-        { id: 'Students', icon: Users },
-        { id: 'Rooms', icon: DoorOpen },
-        { id: 'Payments', icon: CreditCard },
-        { id: 'Complaints', icon: MessageSquare },
-        { id: 'Allocations', icon: CheckSquare },
-        { id: 'Notices', icon: Bell },
+        { id: 'Dashboard',      icon: LayoutDashboard },
+        { id: 'Students',       icon: Users },
+        { id: 'Rooms',          icon: DoorOpen },
+        { id: 'Complaints',     icon: MessageSquare },
+        { id: 'Allocations',    icon: CheckSquare },
+        { id: 'Notices',        icon: Bell },
+        { id: 'Billing',        icon: CreditCard },
+        { id: 'Invoices',       icon: FileText },
+        { id: 'Reports',        icon: BarChart3 },
+        { id: 'Discounts',      icon: Tag },
     ];
 
     return (
